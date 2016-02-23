@@ -1,0 +1,30 @@
+* {
+	box-sizing: border-box;
+
+}
+
+h1 {
+	text-align: center;
+	position: relative;
+	margin:auto;
+	color: white;
+	padding-top: 3px;
+}
+
+body {
+	background-color: #F5F1F1;
+	font-family:Oxygen,Helvetica, Times,sans-serif ;
+
+}
+
+section {
+	background-color: gray;
+}
+
+header {
+	position: relative;
+	width:100%;
+	background-color: #DA5656;
+	height: 50px;
+
+}
