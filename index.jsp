@@ -8,14 +8,8 @@
 </head>
 
 <body>
-
 	<header>
 		<h1>Welcome to Simple Chess</h1>
 	</header>
-
-
-	
 </body>
-
-
 </html>

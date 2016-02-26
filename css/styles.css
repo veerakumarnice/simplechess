@@ -9,6 +9,7 @@ h1 {
 	margin:auto;
 	color: white;
 	padding-top: 3px;
+	box-shadow: 1px #fff;
 }
 
 body {
