@@ -27,5 +27,40 @@ header {
 	width:100%;
 	background-color: #DA5656;
 	height: 50px;
+	overflow: hidden;
 
+}
+
+.hidden {
+	visibility: hidden;
+}
+
+.button {
+	background-color: orange;
+	color:white;
+	
+	height:30px;
+}
+
+#lgout {
+	float: right;
+	bottom:20px;
+	position: absolute;
+	top:10px;
+	right: 5px;
+}
+
+.error {
+	width: 40%;
+	height: 50%;
+	margin: 20% auto;
+
+}
+
+.signupform, .loginform {
+	width: 20%;
+}
+
+.loginform {
+margin-top: 40px;
 }

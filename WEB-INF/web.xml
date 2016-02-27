@@ -64,4 +64,29 @@
      <servlet-name>restapi</servlet-name>
      <url-pattern>/rest</url-pattern>
     </servlet-mapping>
+    <servlet>
+      <servlet-name>bean</servlet-name>
+      <servlet-class>chess.db.Bean</servlet-class>
+      <load-on-startup>0</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+     <servlet-name>bean</servlet-name>
+     <url-pattern>/bean</url-pattern>
+    </servlet-mapping>
+    <servlet>
+      <servlet-name>errorpage</servlet-name>
+      <servlet-class>/errorpage.jsp</servlet-class>
+    </servlet>
+    <servlet-mapping>
+     <servlet-name>errorpage</servlet-name>
+     <url-pattern>/error</url-pattern>
+    </servlet-mapping>
+    <servlet>
+      <servlet-name>home</servlet-name>
+      <servlet-class>/home.jsp</servlet-class>
+    </servlet>
+    <servlet-mapping>
+     <servlet-name>home</servlet-name>
+     <url-pattern>/home</url-pattern>
+    </servlet-mapping>
 </web-app>
