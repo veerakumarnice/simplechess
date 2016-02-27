@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 public class Bean extends HttpServlet{
 	ArrayList<User> users = new ArrayList<User>();
+	ArrayList<User> activeUsers = new ArrayList<User>();
 
 	public void init() {
 		users.add(new User("veerakumarnice@gmail.com","nicepass","veera","kumar", 1));
@@ -46,6 +47,8 @@ public class Bean extends HttpServlet{
 				user = request.getParameter("email"); 
 				pass = request.getParameter("pass");
 				login(user, pass, request, response);
+				System.out.println("login after that");
+				return;
 			}
 		}
 		else if(action.equals("signup")) {
@@ -56,15 +59,14 @@ public class Bean extends HttpServlet{
 			if(!userExist(user)) {
 				System.out.println("User does not exist");
 				signup(user, pass, firstname, lastname);
-				System.out.println("number of users " + users.size());
-
+				System.out.println("number of users " + users.size());				
 			}
 			else {
-
-			}		
+				goToError(request, response);
+			}
 		}
 		else {
-			System.out.println("");
+			goToError(request, response);
 		}
 	}
 
@@ -111,7 +113,12 @@ public class Bean extends HttpServlet{
 					session.setAttribute("firstname", u.getFirstName());
 					session.setAttribute("lastname", u.getLastName());
 					session.setAttribute("userid", u.getUserId());
-					goToHome(request, response);
+					//goToHome(request, response);
+					System.out.println("Dispatching to chess jsp file");
+					response.sendRedirect("/simplechess/chess");
+					return true;
+					//RequestDispatcher rd = request.getRequestDispatcher("chess.jsp");
+					//rd.forward(request, response);
 					
 				}
 				else {

@@ -75,7 +75,7 @@
     </servlet-mapping>
     <servlet>
       <servlet-name>errorpage</servlet-name>
-      <servlet-class>/errorpage.jsp</servlet-class>
+      <jsp-file>/errorpage.jsp</jsp-file>
     </servlet>
     <servlet-mapping>
      <servlet-name>errorpage</servlet-name>
@@ -83,10 +83,20 @@
     </servlet-mapping>
     <servlet>
       <servlet-name>home</servlet-name>
-      <servlet-class>/home.jsp</servlet-class>
+      <jsp-file>/home.jsp</jsp-file>
     </servlet>
     <servlet-mapping>
      <servlet-name>home</servlet-name>
      <url-pattern>/home</url-pattern>
     </servlet-mapping>
+    <servlet>
+      <servlet-name>chess</servlet-name>
+      <jsp-file>/chess.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+     <servlet-name>chess</servlet-name>
+     <url-pattern>/chess</url-pattern>
+    </servlet-mapping>
+
+
 </web-app>

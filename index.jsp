@@ -4,10 +4,20 @@
 <%@ include file="head.jsp" %>
 
 <body>
-	
+	<%@ include file="checkSession.jsp"%>
 	<% String heading = "Welcome to Simple Chess INDEX";%>
 	<%@ include file="header.jsp" %>
+	<script type="text/javascript">
+		document.addEventListener("DOMContentLoaded", function (event) {
+			var loginbt = document.getElementById('lgout');
+		//console.log("out "+ loginbt.innerHTML);
+		if(loginbt.innerHTML.trim() == 'Login') {
+			loginbt.style.visibility = "hidden";
+		}
+		
 
+		});		
+	</script>
 	<form class="signupform" method="post" action="bean">
 		<input type="text" name="email" placeholder="Email"> 
 		<input type="password" name="pass" placeholder="password">
@@ -28,15 +38,6 @@
 
 		%>
 	</div>
-	<script type="text/javascript">
-		var loginbt = document.getElementById('lgout');
-		console.log("out "+ loginbt.innerHTML);
-		if(loginbt.innerHTML.trim() == 'Login') {
-			loginbt.style.visibility = "hidden";
-		}
-		
-
-	</script>
-
+	
 </body>
 </html>
