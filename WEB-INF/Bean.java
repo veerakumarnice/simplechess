@@ -18,6 +18,7 @@ public class Bean extends HttpServlet{
 	public void init() {
 		users.add(new User("veerakumarnice@gmail.com","nicepass","veera","kumar", 1));
 		users.add(new User("arjungowthaman@gmail.com","arjunchitra","arjun","gowthaman", 2));
+		users.add(new User("ramprasanth@gmail.com","ranragav","ram","prasanth", 3));
 		System.out.println("number of users " + users.size());
 	}
 
@@ -47,7 +48,7 @@ public class Bean extends HttpServlet{
 				user = request.getParameter("email"); 
 				pass = request.getParameter("pass");
 				login(user, pass, request, response);
-				System.out.println("login after that");
+				//System.out.println("login after that");
 				return;
 			}
 		}
@@ -114,7 +115,7 @@ public class Bean extends HttpServlet{
 					session.setAttribute("lastname", u.getLastName());
 					session.setAttribute("userid", u.getUserId());
 					//goToHome(request, response);
-					System.out.println("Dispatching to chess jsp file");
+					//System.out.println("Dispatching to chess jsp file");
 					response.sendRedirect("/simplechess/chess");
 					return true;
 					//RequestDispatcher rd = request.getRequestDispatcher("chess.jsp");

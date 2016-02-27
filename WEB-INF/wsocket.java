@@ -14,11 +14,12 @@ import java.util.*;
 
 
 @ServerEndpoint(value="/wsocket")
-public class wsocket {
-
+public class wsocket {	
+	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
 	@OnOpen
 	public void onOpen(final Session session) throws IOException, EncodeException{
 		System.out.println("client connected");
+		sessions.add(session);
 		JsonObject json = Json.createObjectBuilder().add("message", "sent from server").build();
 		session.getBasicRemote().sendText(json.toString());
 	}
@@ -26,13 +27,17 @@ public class wsocket {
 	@OnMessage
 	public String onMessage(String message, final Session session) {
 		System.out.println("Received from client :" + message);
-		JsonObject json = Json.createObjectBuilder().add("message", message).build();
+		JsonObject json = Json.createObjectBuilder().add("message", message + "sent from server").build();
 		System.out.println(json);
 		try {
-			for(Session s : session.getOpenSessions()) {
-				if(s.isOpen()) {
+			for(Session s : sessions) {
+			//	System.out.println("session open :" + s.getId());
+			//	if(s.isOpen()) {
+				if(!s.equals(session)) {
+					System.out.println("sent to client " + s.getId() +" list size is "+sessions.size());
 					s.getBasicRemote().sendText(json.toString());
 				}
+				//}
 			}
 		}
 		catch(IOException e) {
