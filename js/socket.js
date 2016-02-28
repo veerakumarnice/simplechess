@@ -23,6 +23,6 @@ function closeConnect() {
 }
 
 function sendMessage(source) {
-		ws.send(document.getElementById('textmessage').value);
+		ws.send(JSON.stringify({"client":document.getElementById('textmessage').value}));
 		document.getElementById('textmessage').value = "" ;
 }

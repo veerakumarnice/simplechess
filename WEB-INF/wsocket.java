@@ -1,5 +1,6 @@
 package serverend;
 
+import java.io.StringReader;
 import java.io.IOException;
 import javax.websocket.EncodeException;
 import javax.websocket.server.ServerEndpoint;
@@ -14,7 +15,8 @@ import java.util.*;
 
 
 @ServerEndpoint(value="/wsocket")
-public class wsocket {	
+public class wsocket {
+	private static boolean turn = true;	
 	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
 	@OnOpen
 	public void onOpen(final Session session) throws IOException, EncodeException{
@@ -27,6 +29,12 @@ public class wsocket {
 	@OnMessage
 	public String onMessage(String message, final Session session) {
 		System.out.println("Received from client :" + message);
+
+		/*switch (message) {
+			
+		}*/
+		JsonObject obj = Json.createParser(new StringReader(message));
+		System.out.println(obj.toString());
 		JsonObject json = Json.createObjectBuilder().add("message", message + "sent from server").build();
 		System.out.println(json);
 		try {
@@ -48,13 +56,26 @@ public class wsocket {
 	}
 
 	@OnClose
-	public void onClose() {
+	public void onClose(Session session) {
 		System.out.println("Connection close");
+		sessions.remove(session);
 	}
 
 	@OnError
 	public void onError(Throwable e) {
 		System.out.println("Error occured at wsocket" + e);
+	}
+
+	private String getTurn() {
+		if(turn) {
+			turn = false;
+			return "white";
+		}
+		else {
+			turn = true;
+			return "black";
+		}
+		
 	}
 
 
