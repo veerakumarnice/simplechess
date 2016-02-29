@@ -24,7 +24,9 @@ ws.onmessage = function(message) {
 		case "clientMoveMade" :
 			oppenentMoved(json.from, json.to);
 			break;
-
+		case "activeUsers" :
+			showUsers(json.users);
+			break;
 	}
 };
 
@@ -69,4 +71,16 @@ function oppenentMoved(attacker, fallen) {
 
 function resignRequest() {
 	ws.send(JSON.stringify({notify:'resign',username: username}));
+}
+
+function showUsers(usersArray) {
+	var list = document.getElementById('chatlist');
+	for(var u in usersArray ) {
+		if(usersArray[u] != username) {
+			var node = document.createElement("option");
+			node.setAttribute("value", usersArray[u]);
+			node.innerHTML = usersArray[u];
+			list.appendChild(node);
+		}
+	}
 }

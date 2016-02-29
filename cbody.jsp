@@ -16,9 +16,16 @@
 		</table>
 
 	</div>
-	<!--div class = "right">
-	<p >right </p>
-	</div-->
+	<div class = "right">
+	<h3>Event Board</h3>
+	<div class="chatContainer">
+		<select id="chatlist">
+			<option> ------Select----- </option>
+		</select>
+		<button>Invite</button>
+	</div>
+	<button onclick="getUsers()">Refresh List</button>
+	</div>
 </div>
 <br><br>
 

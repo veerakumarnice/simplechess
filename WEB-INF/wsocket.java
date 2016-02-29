@@ -16,9 +16,12 @@ import java.util.*;
 
 @ServerEndpoint(value="/wsocket/{user}")
 public class wsocket {
+	
 	private static boolean turn = true;
 	private static boolean assigned = false;
 	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
+	private Session opponent;
+
 	@OnOpen
 	public void onOpen(final Session session) throws IOException, EncodeException{
 		System.out.println("client connected");
@@ -46,7 +49,7 @@ public class wsocket {
 					System.out.println("New Client connected :" +json.getString("username"));
 					session.getUserProperties().put("username",json.getString("username"));
 					System.out.println(json);
-					notifyOpponent(message, session);
+					notify(message, session, "all");
 					break;
 				case "needActiveUsers":
 					session.getBasicRemote().sendText(getActiveUsers(session).toString());
@@ -56,31 +59,41 @@ public class wsocket {
 					assignPlayers();
 					break;
 				case "clientMoveMade" :					
-					notifyOpponent(message, session);
+					notify(message, session, "opponent");
 					break;
-				//case "" :
-				//	break				
 		}
+	}
+
+	private boolean startGame(String opp) throws IOException {
+		for (Session s : sessions) {
+			if(s.getUserProperties().get("username").equals(opp)) {
+				opponent = s;
+			}
+		}
+		return true;
+	}
 
 
-		//System.out.println(json.toString());
-		//JsonObject json = Json.createObjectBuilder().add("message", message + "sent from server").build();
+	private void notify(String message, Session session, String reciever) throws IOException{
+		System.out.println("notify called");
 		
+		switch (reciever) {
 
-		//return json.toString();//"echo " + message + session.getOpenSessions() +" "+ object.toString()+" " + user ;
+			case "all":
+				for(Session s : sessions) {
+					if(!s.equals(session)) {
+						s.getBasicRemote().sendText(message);
+					}
+				}	
+				break;
+
+			case "opponent":
+
+				break;
+		}			
 	}
 
-	private void notifyOpponent(String message, Session session) throws IOException{
-		System.out.println("notifyOpponent called");
-			for(Session s : sessions) {
-				if(!s.equals(session)) {
-					s.getBasicRemote().sendText(message);
-				}
-			//}
-			}				
-	}
-
-	private JsonArray getActiveUsers(Session session) throws IOException {
+	private JsonObject getActiveUsers(Session session) throws IOException {
 	
 		Set<Session> list = getPlayerList();
 		JsonArrayBuilder object = Json.createArrayBuilder();
@@ -88,7 +101,8 @@ public class wsocket {
 			object.add((String)s.getUserProperties().get("username"));
 		}
 		JsonArray array = object.build();
-		return array;
+		JsonObject json = Json.createObjectBuilder().add("notify","activeUsers").add("users",array).build();
+		return json;
 
 	}
 
@@ -134,4 +148,3 @@ public class wsocket {
 
 
 }
-
