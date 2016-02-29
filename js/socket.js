@@ -20,7 +20,12 @@ ws.onmessage = function(message) {
 	var json = JSON.parse(message.data);
 	console.log("message recieved");
 	console.log(json);
-	
+	switch(json.notify) {
+		case "clientMoveMade" :
+			oppenentMoved(json.from, json.to);
+			break;
+
+	}
 };
 
 ws.onclose = function() {
@@ -34,10 +39,34 @@ function closeConnect() {
 }
 
 function getUsers() {
-	ws.send(JSON.stringify({notify:'needActiveUsers', client:username}));
+	ws.send(JSON.stringify({notify:'needActiveUsers', username:username}));
 }
 
 function sendMessage(source) {
-		ws.send(JSON.stringify({notify:'clientMessage',client:username, chatMessage:document.getElementById('textmessage').value}));
+		ws.send(JSON.stringify({notify:'clientMessage',username:username, chatMessage:document.getElementById('textmessage').value}));
 		document.getElementById('textmessage').value = "" ;
+}
+
+function assignRequest() {
+	ws.send(JSON.stringify({notify:'assignPlayers',username:username}));
+}
+
+function playerAssignment(fromServer) {
+	myPlayer = fromServer;
+}
+
+function moveMade(attacker, fallen) {
+	ws.send(JSON.stringify({notify:'clientMoveMade', username: username, from: attacker, to: fallen}));
+}
+
+function oppenentMoved(attacker, fallen) {
+	var opp = document.getElementById(attacker);
+	var pos = document.getElementById(fallen);
+	console.log("oppenentMoved called");
+	opp.click();
+	pos.click();
+}
+
+function resignRequest() {
+	ws.send(JSON.stringify({notify:'resign',username: username}));
 }

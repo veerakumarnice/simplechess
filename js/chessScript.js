@@ -1,26 +1,28 @@
 var chance = 'white' ;
 var gameIn = false;
 var pElem;
+var myPlayer;
 var onmove = false;
 var fallenPieces = [];
 var restart = false;
 var castling = false;
-var history ;//= {whiterook1:false,whiterook2:false,whiteking1:false,blackrook1:false, blackrook2:false, blackking1:false};
-history.whiterook1 = false;
-history.whiterook2 = false;
-history.whiteking1 = false;
-history.blackrook1 = false;
-history.blackrook2 = false;
-history.blackking1 = false;
-//alert('out alert ' + history.whiterook2);
+var track = {whiterook1:false,whiterook2:false,whiteking1:false,blackrook1:false, blackrook2:false, blackking1:false};/*
+track.whiterook1 = false;
+track.whiterook2 = false;
+track.whiteking1 = false;
+track.blackrook1 = false;
+track.blackrook2 = false;
+track.blackking1 = false; */
+//alert('out alert ' + track.whiterook2);
 function startGame(src) {
 	if(!gameIn) {
 		src.innerHTML = "Click here to Stop!" ;
 		gameIn = true;
 		chance = 'white';
-		//alert(history['whiterook1']);
+		//alert(track['whiterook1']);
 		addSquares(src);
 		addChessElements(src);
+		assignRequest();
 	}
 	else {
 		src.innerHTML = "Click here to Start!";
@@ -29,7 +31,8 @@ function startGame(src) {
 		pElem  = null;
 		removeSquares();
 		removeChessElements();
-		removeLeftPieces();		
+		removeLeftPieces();
+		resignRequest();	
 	}
 }
 
@@ -296,7 +299,10 @@ function moveElement(event, src) {
 
 function stopEvent(event) {
 	event = event || window.event;
-	if(event.stopPropagation) 
+	if(event === undefined) {
+		console.log("undefined event define this one");
+	}
+	else if(event.stopPropagation) 
 		event.stopPropagation();
 	else
 		event.cancelBubble = true; 	
@@ -323,11 +329,14 @@ function moveToThis(event, src) {
 						//enpassant = {piece:pElem,pos:} ;
 				//	}
 				//}
+				moveMade(pElem.getAttribute("id"), src.getAttribute("id"));
 				onmove = false;
 				clearSelection(pElem);
 				pElem = null;
 				
-				changeChance();				
+				changeChance();
+				
+
 			} 
 		}
 		else
@@ -345,10 +354,12 @@ function moveToThis(event, src) {
 					if(!hasIntermediate(Number(pElem.parentNode.getAttribute('id')),Number(src.getAttribute('id')),'castle', null)) {
 						castle(pElem, src.childNodes[0]);
 						clearSelection(pElem);
+						moveMade(pElem.getAttribute("id"), src.getAttribute("id"));
 						pElem = null;
 						
 						onmove = false;
 						changeChance();
+						
 					}
 				}
 			}
@@ -371,10 +382,12 @@ function moveToThis(event, src) {
 				
 				cutPiece(pElem, src.childNodes[0]);
 				clearSelection(pElem);
+				moveMade(pElem.getAttribute("id"), src.getAttribute("id"));	
 				pElem = null;
 				
 				onmove = false;
-				changeChance();				
+				changeChance();		
+					
 			}
 			
 		}
@@ -551,8 +564,8 @@ function validMove(src) {
 function isNotMoved(attacker, fallen) {
 	var att =  attacker.getAttribute('id');
 	var fal =  fallen.getAttribute('id');
-	console.log('attacker id = ' + att + ' moved ' + history["whiteking1"]+' '+ ' and fallen id = '+ fal+ ' '+history['whiterook1']);
-	if(history[att] == false && history[fal] == false) {
+	console.log('attacker id = ' + att + ' moved ' + track["whiteking1"]+' '+ ' and fallen id = '+ fal+ ' '+track['whiterook1']);
+	if(track[att] == false && track[fal] == false) {
 		return true;
 	}
 	else {
@@ -744,8 +757,8 @@ function checkSpeicial(type, player, sPos, dPos, src) {
 }
 
 function moved(source) {
-	var attacker = source.getAttribute("player")+source.getAttribute("id");
-	console.log((history[attacker] = true) +""+ attacker);
+	var attacker = source.getAttribute("id");
+	console.log((track[attacker] = true) +""+ attacker);
 }
 
 
