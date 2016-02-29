@@ -14,6 +14,7 @@
 	<input id="textmessage" type="text">
 	<button onclick="sendMessage(this)" >Send</button>
 	<button onclick="closeConnect()" >Close</button>
+	<button onclick="getUsers()">Get Users</button>
 	<script type="text/javascript" src="js/socket.js"></script>
 </body>
 </html>

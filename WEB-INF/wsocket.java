@@ -14,7 +14,7 @@ import javax.json.*;
 import java.util.*;
 
 
-@ServerEndpoint(value="/wsocket")
+@ServerEndpoint(value="/wsocket/{user}")
 public class wsocket {
 	private static boolean turn = true;	
 	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
@@ -22,20 +22,31 @@ public class wsocket {
 	public void onOpen(final Session session) throws IOException, EncodeException{
 		System.out.println("client connected");
 		sessions.add(session);
-		JsonObject json = Json.createObjectBuilder().add("message", "sent from server").build();
-		session.getBasicRemote().sendText(json.toString());
+		//JsonObject json = Json.createObjectBuilder().add("notify", "clientConnected").add().build();
+		//session.getBasicRemote().sendText(json.toString());
 	}
 	
 	@OnMessage
-	public String onMessage(String message, final Session session) {
+	public void onMessage(String message, final Session session, @PathParam("user") final String user) throws IOException{
 		System.out.println("Received from client :" + message);
+		JsonReader jreader = Json.createReader(new StringReader(message));
+		JsonObject json =  jreader.readObject();
+		jreader.close();
 
-		/*switch (message) {
-			
-		}*/
-		JsonObject obj = Json.createParser(new StringReader(message));
-		System.out.println(obj.toString());
-		JsonObject json = Json.createObjectBuilder().add("message", message + "sent from server").build();
+		switch (json.getString("notify")) {
+				case "clientConnected":
+					System.out.println("New Client connected :" +json.getString("username"));
+					session.getUserProperties().put("username",json.getString("username"));
+					break;
+				case "needActiveUsers":
+					session.getBasicRemote().sendText(getActiveUsers(session));
+					return;
+					
+		}
+
+
+		//System.out.println(json.toString());
+		//JsonObject json = Json.createObjectBuilder().add("message", message + "sent from server").build();
 		System.out.println(json);
 		try {
 			for(Session s : sessions) {
@@ -43,7 +54,7 @@ public class wsocket {
 			//	if(s.isOpen()) {
 				if(!s.equals(session)) {
 					System.out.println("sent to client " + s.getId() +" list size is "+sessions.size());
-					s.getBasicRemote().sendText(json.toString());
+					s.getBasicRemote().sendText(message);
 				}
 				//}
 			}
@@ -52,8 +63,26 @@ public class wsocket {
 			System.out.println("IOException occured at wsocket");
 		}
 
-		return json.toString();//"echo " + message + session.getOpenSessions() +" "+ object.toString()+" " + user ;
+		//return json.toString();//"echo " + message + session.getOpenSessions() +" "+ object.toString()+" " + user ;
 	}
+
+	private String getActiveUsers(Session session) {
+		String array = "[";
+		int size = sessions.size();
+		int count = 0;
+		for (Session s : sessions) {
+			array += "'"+s.getUserProperties().get("username") +"'";
+			count++;
+			if (count != size) {
+				array += ",";
+			}
+		}
+		array += "]";
+	/*	JsonReader jreader = Json.createReader(new StringReader(array));
+		JsonArray jArray = jreader.readArray();*/
+		return Json.createObjectBuilder().add("notify","invoked").build().toString();//jArray.toString();
+	}
+
 
 	@OnClose
 	public void onClose(Session session) {
@@ -65,6 +94,7 @@ public class wsocket {
 	public void onError(Throwable e) {
 		System.out.println("Error occured at wsocket" + e);
 	}
+
 
 	private String getTurn() {
 		if(turn) {
