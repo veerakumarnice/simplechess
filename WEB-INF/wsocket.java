@@ -55,9 +55,11 @@ public class wsocket {
 				case "assignPlayers" :
 					assignPlayers();
 					break;
-				case "clientMoveMade" :
+				case "clientMoveMade" :					
 					notifyOpponent(message, session);
-					break;					
+					break;
+				//case "" :
+				//	break				
 		}
 
 
@@ -71,8 +73,6 @@ public class wsocket {
 	private void notifyOpponent(String message, Session session) throws IOException{
 		System.out.println("notifyOpponent called");
 			for(Session s : sessions) {
-		//	System.out.println("session open :" + s.getId());
-		//	if(s.isOpen()) {
 				if(!s.equals(session)) {
 					s.getBasicRemote().sendText(message);
 				}
@@ -81,27 +81,15 @@ public class wsocket {
 	}
 
 	private JsonArray getActiveUsers(Session session) throws IOException {
-		//JsonArray array = Json.createArrayBuilder().add("veera").build();
-		String st = "[";
-		int count = 1;
-		int size = sessions.size();
-		for (Session s : sessions) {
-			if (!s.equals(session)) {
-		//		array.add("username", (String) s.getUserProperties().get("username"));
-				st +=(String) s.getUserProperties().get("username");
-			}
-			if(count >= size) {
-				st += ",";
-
-			}
-			count++;		
+	
+		Set<Session> list = getPlayerList();
+		JsonArrayBuilder object = Json.createArrayBuilder();
+		for(Session s : list) {
+			object.add((String)s.getUserProperties().get("username"));
 		}
-		st += "]";
-		//array.build();
-		JsonReader jreader = Json.createReader(new StringReader(st));
-		JsonArray array =  jreader.readArray();
-		jreader.close();
+		JsonArray array = object.build();
 		return array;
+
 	}
 
 
@@ -113,7 +101,7 @@ public class wsocket {
 
 	@OnError
 	public void onError(Throwable e) {
-		System.out.println("Error occured at wsocket\n");
+		System.out.println("Error occured at wsocket " + e);
 		//e.printStackTrace();
 	}
 
@@ -130,10 +118,6 @@ public class wsocket {
 	}
 
 	private static void assignPlayers() throws IOException{
-		/*if(assigned) {
-			return;
-		}*/
-
 		Set<Session> gameSessions = getPlayerList();
 		for(Session s: gameSessions) {
 			String playerTurn = getTurn();
