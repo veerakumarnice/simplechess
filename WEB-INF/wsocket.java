@@ -21,7 +21,14 @@ public class wsocket {
 	@OnOpen
 	public void onOpen(final Session session) throws IOException, EncodeException{
 		System.out.println("client connected");
-		sessions.add(session);
+		if(sessions.size() == 2) {
+			JsonObject json = Json.createObjectBuilder().add("notify", "sessionOverflow").add("count",sessions.size()).build();
+			session.getBasicRemote().sendText(json.toString());
+			session.close();
+		}
+		else {
+			sessions.add(session);
+		}
 		//JsonObject json = Json.createObjectBuilder().add("notify", "clientConnected").add().build();
 		//session.getBasicRemote().sendText(json.toString());
 	}

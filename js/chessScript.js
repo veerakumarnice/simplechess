@@ -87,7 +87,7 @@ function addPawns(src) {
 		img.setAttribute("class","piece pawn black");
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
 		img.setAttribute("onclick","moveElement(event,this)");
-		img.setAttribute("id","pawn"+col);
+		img.setAttribute("id","blackpawn"+col);
 		img.setAttribute("player","black");
 		img.setAttribute("piece","pawn");
 		pawn.appendChild(img);
@@ -100,7 +100,7 @@ function addPawns(src) {
 		img.setAttribute("class","piece pawn white");
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
 		img.setAttribute("onclick","moveElement(event,this)");
-		img.setAttribute("id","pawn"+col);
+		img.setAttribute("id","whitepawn"+col);
 		img.setAttribute("player","white");
 		img.setAttribute("piece","pawn");
 		pawn.appendChild(img);
@@ -120,16 +120,19 @@ function addRooks() {
 			img.setAttribute("src","img/blackRook.png");
 			img.setAttribute("class","piece rook black");
 			img.setAttribute("player","black");
+			img.setAttribute("id","blackrook"+(Math.floor(i/2)+1));
+
 		}
 		else {
 			img.setAttribute("src","img/whiteRook.png");
 			img.setAttribute("class","piece rook white");
 			img.setAttribute("player","white");
+			img.setAttribute("id","whiterook"+(Math.floor(i/2)+1));
 		}
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
 		img.setAttribute("onclick","moveElement(event,this)");
 		img.setAttribute("piece","rook");
-		img.setAttribute("id","rook"+(Math.floor(i/2)+1));
+		
 		target.appendChild(img);
 	}
 }
@@ -144,16 +147,18 @@ function addBhisops() {
 			img.setAttribute("src","img/blackBishop.png");
 			img.setAttribute("class","piece bishop black");
 			img.setAttribute("player","black");
+			img.setAttribute("id","blackbishop"+(Math.floor(i/2)+1));
 		}
 		else {
 			img.setAttribute("src","img/whiteBishop.png");
 			img.setAttribute("class","piece bishop white");
 			img.setAttribute("player","white");
+			img.setAttribute("id","whitebishop"+(Math.floor(i/2)+1));
 		}
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
 		img.setAttribute("onclick","moveElement(event,this)");
 		img.setAttribute("piece","bishop");
-		img.setAttribute("id","bishop"+(Math.floor(i/2)+1));
+		
 		target.appendChild(img);
 	}
 
@@ -169,16 +174,18 @@ function addKnights() {
 			img.setAttribute("src","img/blackKnight.png");
 			img.setAttribute("class","piece knight black");
 			img.setAttribute("player","black");
+			img.setAttribute("id","blackknight"+(Math.floor(i/2)+1));
 		}
 		else {
 			img.setAttribute("src","img/whiteKnight.png");
 			img.setAttribute("class","piece knight white");
 			img.setAttribute("player","white");
+			img.setAttribute("id","whiteknight"+(Math.floor(i/2)+1));
+
 		}
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
 		img.setAttribute("onclick","moveElement(event,this)");
 		img.setAttribute("piece","knight");
-		img.setAttribute("id","knight"+(Math.floor(i/2)+1));
 		target.appendChild(img);
 	}
 }
@@ -193,16 +200,18 @@ function addQueen() {
 			img.setAttribute("src","img/blackQueen.png");
 			img.setAttribute("class","piece queen black");
 			img.setAttribute("player","black");
+			img.setAttribute("id","blackqueen"+(Math.floor(i/2)+1));
 		}
 		else {
 			img.setAttribute("src","img/whiteQueen.png");
 			img.setAttribute("class","piece queen white");
 			img.setAttribute("player","white");
+			img.setAttribute("id","whitequeen"+(Math.floor(i/2)+1));
 		}
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
 		img.setAttribute("onclick","moveElement(event,this)");
 		img.setAttribute("piece","queen");
-		img.setAttribute("id","queen"+(Math.floor(i/2)+1));
+		
 		target.appendChild(img);
 	}
 
@@ -218,16 +227,18 @@ function addKing() {
 			img.setAttribute("src","img/blackKing.png");
 			img.setAttribute("class","piece king black");
 			img.setAttribute("player","black");
+			img.setAttribute("id","blackking"+(Math.floor(i/2)+1));
 		}
 		else {
 			img.setAttribute("src","img/whiteKing.png");
 			img.setAttribute("class","piece king white");
 			img.setAttribute("player","white");
+			img.setAttribute("id","whiteking"+(Math.floor(i/2)+1));
 		}
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
 		img.setAttribute("onclick","moveElement(event,this)");
 		img.setAttribute("piece","king");
-		img.setAttribute("id","king"+(Math.floor(i/2)+1));
+		
 		target.appendChild(img);
 	}
 }
@@ -538,8 +549,8 @@ function validMove(src) {
 
 
 function isNotMoved(attacker, fallen) {
-	var att = attacker.getAttribute('player') + attacker.getAttribute('id');
-	var fal = fallen.getAttribute('player') + fallen.getAttribute('id');
+	var att =  attacker.getAttribute('id');
+	var fal =  fallen.getAttribute('id');
 	console.log('attacker id = ' + att + ' moved ' + history["whiteking1"]+' '+ ' and fallen id = '+ fal+ ' '+history['whiterook1']);
 	if(history[att] == false && history[fal] == false) {
 		return true;
