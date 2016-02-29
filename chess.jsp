@@ -1,4 +1,5 @@
 <%@ page language="java" %>
+<%@ include file="checkSession.jsp" %>
 <% String title = "Chess game"; %>
 
 <%@ include file="head.jsp" %>
@@ -16,7 +17,5 @@
 	<button onclick="getUsers()">Get Users</button-->
 	<button onclick="assignRequest()">assign</button>
 	<script type="text/javascript" src="js/socket.js"></script>
-
-
 </body>
 </html>

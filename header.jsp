@@ -12,7 +12,10 @@
 			}
 			%>
 			<%=user %>
+
+
 		</button>
+		}
 		<script> 
 			
 			var loggedin;

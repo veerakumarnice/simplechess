@@ -27,6 +27,28 @@ ws.onmessage = function(message) {
 		case "activeUsers" :
 			showUsers(json.users);
 			break;
+		case "inviteRequest" :
+			var choicemade = confirm("Do you wish to play with "+json.username);
+			if(choicemade) {
+				ws.send(JSON.stringify({notify:'acceptInvitation',username: username, opp:json.username,status:"yes"}));
+			}
+			else {
+				ws.send(JSON.stringify({notify:'acceptInvitation',username:json.username, status: "no"}));
+			}
+			break;
+		case "inviteStatus" :
+			if(json.status == "yes") {
+				console.log("accpeted invitation");
+				myPlayer = json.player;
+				document.getElementById('myP').innerHTML= "  You :" +myPlayer;
+				document.getElementById('btn').click();
+			}
+			break;
+		case "initiateGame" :
+			myPlayer = json.player;
+			document.getElementById('myP').innerHTML= "  You :" +myPlayer;
+			document.getElementById('btn').click();
+			break;
 	}
 };
 
@@ -49,6 +71,10 @@ function sendMessage(source) {
 		document.getElementById('textmessage').value = "" ;
 }
 
+function inviteRequest(opp) {
+	ws.send(JSON.stringify({notify:"inviteRequest",username:username,invite:opp}));
+}
+
 function assignRequest() {
 	ws.send(JSON.stringify({notify:'assignPlayers',username:username}));
 }
@@ -65,8 +91,10 @@ function oppenentMoved(attacker, fallen) {
 	var opp = document.getElementById(attacker);
 	var pos = document.getElementById(fallen);
 	console.log("oppenentMoved called");
+	serverMove = true;
 	opp.click();
 	pos.click();
+	serverMove = false;
 }
 
 function resignRequest() {
@@ -75,6 +103,10 @@ function resignRequest() {
 
 function showUsers(usersArray) {
 	var list = document.getElementById('chatlist');
+	list.innerHTML = "";
+	var sel = document.createElement("option");
+	sel.innerHTML = " ------Select----- ";
+	list.appendChild(sel);
 	for(var u in usersArray ) {
 		if(usersArray[u] != username) {
 			var node = document.createElement("option");

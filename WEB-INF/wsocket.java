@@ -16,7 +16,7 @@ import java.util.*;
 
 @ServerEndpoint(value="/wsocket/{user}")
 public class wsocket {
-	
+
 	private static boolean turn = true;
 	private static boolean assigned = false;
 	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
@@ -55,6 +55,19 @@ public class wsocket {
 					session.getBasicRemote().sendText(getActiveUsers(session).toString());
 					System.out.println("Sent active users list to " + json.getString("username")) ;
 					break;
+				case "inviteRequest" :
+					startGame(json.getString("username"), json.getString("invite"));
+					break;
+				case "acceptInvitation" :
+					if (json.getString("status").equals("yes")){
+						setOppenent(json.getString("opp"));
+						inviteStatus(json.getString("username"), json.getString("opp"), "yes");
+						session.getBasicRemote().sendText("{\"notify\":\"initiateGame\",\"opponent\":\""+json.getString("opp")+"\""+ ","+"\"player\":\"black\"}");
+					}
+					else {
+						inviteStatus(json.getString("username"), json.getString("opp"), "no");
+					}
+					break;
 				case "assignPlayers" :
 					assignPlayers();
 					break;
@@ -64,15 +77,43 @@ public class wsocket {
 		}
 	}
 
-	private boolean startGame(String opp) throws IOException {
+	private void setOppenent(String opp) {
 		for (Session s : sessions) {
 			if(s.getUserProperties().get("username").equals(opp)) {
 				opponent = s;
+				return;
 			}
 		}
+	}
+
+	private void inviteStatus(String user, String opp, String status) throws IOException {
+		JsonObjectBuilder json = Json.createObjectBuilder().add("notify","inviteStatus").add("username",user).add("status", status);
+		if(status == "yes") {
+			json.add("player","white");
+		}
+		JsonObject obj = json.build();
+		for(Session s : sessions) {
+					if(s.getUserProperties().get("username").equals(opp)) {
+						s.getBasicRemote().sendText(obj.toString());
+						return;
+					}
+				}	
+	}
+
+	private boolean startGame(String myPlayer, String opp) throws IOException {
+		setOppenent(opp);
+		opponent.getBasicRemote().sendText(inviteToGame(myPlayer));
 		return true;
 	}
 
+/*	private JsonObject initiateGame() {
+
+	}*/
+
+	private String inviteToGame(String myPlayer) {
+		JsonObject json = Json.createObjectBuilder().add("notify","inviteRequest").add("username",myPlayer).build();
+		return json.toString();
+	}
 
 	private void notify(String message, Session session, String reciever) throws IOException{
 		System.out.println("notify called");
@@ -88,8 +129,10 @@ public class wsocket {
 				break;
 
 			case "opponent":
-
+				opponent.getBasicRemote().sendText(message);
 				break;
+
+			
 		}			
 	}
 

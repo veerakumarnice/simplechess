@@ -1,19 +1,13 @@
 var chance = 'white' ;
 var gameIn = false;
+var serverMove = false;
 var pElem;
 var myPlayer;
 var onmove = false;
 var fallenPieces = [];
 var restart = false;
 var castling = false;
-var track = {whiterook1:false,whiterook2:false,whiteking1:false,blackrook1:false, blackrook2:false, blackking1:false};/*
-track.whiterook1 = false;
-track.whiterook2 = false;
-track.whiteking1 = false;
-track.blackrook1 = false;
-track.blackrook2 = false;
-track.blackking1 = false; */
-//alert('out alert ' + track.whiterook2);
+var track = {whiterook1:false,whiterook2:false,whiteking1:false,blackrook1:false, blackrook2:false, blackking1:false};
 function startGame(src) {
 	if(!gameIn) {
 		src.innerHTML = "Click here to Stop!" ;
@@ -266,24 +260,34 @@ function moveElement(event, src) {
 		if(con) {
 			gameIn = true;
 			restart = false;
-			startGame(document.getElementById('btn'));
-		
+			startGame(document.getElementById('btn'));			
 		}
 		return;
 	}
 
-	if(src.getAttribute("player") != chance && !onmove) {
-		alert("Its your oppnenet's move");
+
+
+	if(src.getAttribute("player") != chance && !onmove ) {
+		alert("Its your opponent's move");
 		stopEvent(event);
 		return;
 	}
+	if(src.getAttribute('player') != myPlayer ) {
+			if(!serverMove && pElem == null){
+				alert("Dont do bad");
+				stopEvent(event);
+				return;	
+			}
+								
+	}
+	
 
 	if(onmove && src==pElem) {
 		//alert("source = destination");		
 		onmove = false;
 		clearSelection(pElem);
 		pElem = null;
-		
+		console.log("pelem set to null");
 		src.style.cursor = "grab";
 		stopEvent(event);
 		return;
@@ -291,6 +295,7 @@ function moveElement(event, src) {
 	if(!onmove) {
 		stopEvent(event);
 		pElem = src;
+		console.log("pelem set to "+pElem.getAttribute("id"));
 		src.style.cursor = "grabbing";
 		onmove = true;
 	}
@@ -309,6 +314,11 @@ function stopEvent(event) {
 }
 
 function moveToThis(event, src) {
+	if(pElem == null ){
+		console.log("null error rectified");
+		return;
+	}
+
 	console.log("new move funcion called");
 
 	if(src.childNodes.length ==0) {
@@ -329,7 +339,10 @@ function moveToThis(event, src) {
 						//enpassant = {piece:pElem,pos:} ;
 				//	}
 				//}
-				moveMade(pElem.getAttribute("id"), src.getAttribute("id"));
+				if (myPlayer == chance) {
+					moveMade(pElem.getAttribute("id"), src.getAttribute("id"));	
+				}
+				
 				onmove = false;
 				clearSelection(pElem);
 				pElem = null;
@@ -354,7 +367,9 @@ function moveToThis(event, src) {
 					if(!hasIntermediate(Number(pElem.parentNode.getAttribute('id')),Number(src.getAttribute('id')),'castle', null)) {
 						castle(pElem, src.childNodes[0]);
 						clearSelection(pElem);
-						moveMade(pElem.getAttribute("id"), src.getAttribute("id"));
+						if (myPlayer == chance) {
+							moveMade(pElem.getAttribute("id"), src.getAttribute("id"));	
+						}		
 						pElem = null;
 						
 						onmove = false;
@@ -382,7 +397,10 @@ function moveToThis(event, src) {
 				
 				cutPiece(pElem, src.childNodes[0]);
 				clearSelection(pElem);
-				moveMade(pElem.getAttribute("id"), src.getAttribute("id"));	
+				if (myPlayer == chance) {
+					moveMade(pElem.getAttribute("id"), src.getAttribute("id"));	
+				}
+				
 				pElem = null;
 				
 				onmove = false;

@@ -2,7 +2,7 @@
 <table>
 <tbody>
 	<tr>
-		<td id="pel"></td><td id="onm"></td><td id="turn"></td> 
+		<td id="pel"></td><td id="onm"></td><td id="turn"></td><td id="myP"></td> 
 	</tr>
 </tbody>
 </table>
@@ -19,10 +19,10 @@
 	<div class = "right">
 	<h3>Event Board</h3>
 	<div class="chatContainer">
-		<select id="chatlist">
-			<option> ------Select----- </option>
+		<select id="chatlist" onchange="console.log(this.value)">
+			<option value="none"> ------Select----- </option>
 		</select>
-		<button>Invite</button>
+		<button onclick="inviteRequest(document.getElementById('chatlist').value)">Invite</button>
 	</div>
 	<button onclick="getUsers()">Refresh List</button>
 	</div>

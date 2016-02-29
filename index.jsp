@@ -4,7 +4,7 @@
 <%@ include file="head.jsp" %>
 
 <body>
-	<%@ include file="checkSession.jsp"%>
+	<%@ include file="checkSessionIndex.jsp"%>
 	<% String heading = "Welcome to Simple Chess INDEX";%>
 	<%@ include file="header.jsp" %>
 	<script type="text/javascript">
