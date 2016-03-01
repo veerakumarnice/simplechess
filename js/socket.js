@@ -10,7 +10,8 @@ var username;
 
 var ws = new WebSocket("ws://localhost:8080/simplechess/wsocket/"+username);
 ws.onopen = function() {	
-	ws.send(JSON.stringify({ notify : 'clientConnected', username: username}));	
+	ws.send(JSON.stringify({ notify : 'clientConnected', username: username}));
+	getUsers();
 	console.log("connection opened");
 	connected = true;
 };
@@ -22,7 +23,7 @@ ws.onmessage = function(message) {
 	console.log(json);
 	switch(json.notify) {
 		case "clientMoveMade" :
-			oppenentMoved(json.from, json.to);
+			oppenentMoved(json.from, json.to, json.promotion);
 			break;
 		case "activeUsers" :
 			showUsers(json.users);
@@ -41,13 +42,40 @@ ws.onmessage = function(message) {
 				console.log("accpeted invitation");
 				myPlayer = json.player;
 				document.getElementById('myP').innerHTML= "  You :" +myPlayer;
+				serverMove = true;
 				document.getElementById('btn').click();
+				serverMove = false;
 			}
 			break;
 		case "initiateGame" :
 			myPlayer = json.player;
 			document.getElementById('myP').innerHTML= "  You :" +myPlayer;
+			serverMove =true;
 			document.getElementById('btn').click();
+			serverMove = false;
+			break;
+		case "clientDisconnected" :
+			var sel = document.getElementById('chatlist').childNodes;
+			for (var x in sel) {
+				if(sel[x].value == json.username ) {
+					sel[x].parentNode.removeChild(sel[x]);
+					return;
+				}
+			}
+			break;
+		case "clientConnected" :
+			var sel = document.getElementById("chatlist");
+			var el = document.createElement("option");
+			el.value = json.username;
+			el.innerHTML = json.username;
+			sel.appendChild(el);
+			break;
+
+		case "resign" :
+			serverMove = true;
+			document.getElementById("btn").click();
+			serverMove = false;
+			alert("Your oppenent resigned");
 			break;
 	}
 };
@@ -72,7 +100,14 @@ function sendMessage(source) {
 }
 
 function inviteRequest(opp) {
-	ws.send(JSON.stringify({notify:"inviteRequest",username:username,invite:opp}));
+	if(gameIn) {
+		alert("You must resign your current Game to invite another player");
+		return;
+	}
+	if(opp != "none"){
+		ws.send(JSON.stringify({notify:"inviteRequest",username:username,invite:opp}));	
+	}
+	
 }
 
 function assignRequest() {
@@ -83,17 +118,22 @@ function playerAssignment(fromServer) {
 	myPlayer = fromServer;
 }
 
-function moveMade(attacker, fallen) {
-	ws.send(JSON.stringify({notify:'clientMoveMade', username: username, from: attacker, to: fallen}));
+function moveMade(attacker, fallen, promote) {
+	var json = {notify:'clientMoveMade', username: username, from: attacker, to: fallen};
+	if (promote != undefined || promote != null) {
+		json.promotion = promote;
+	}	
+	ws.send(JSON.stringify(json));
 }
 
-function oppenentMoved(attacker, fallen) {
+function oppenentMoved(attacker, fallen, promote) {
 	var opp = document.getElementById(attacker);
 	var pos = document.getElementById(fallen);
 	console.log("oppenentMoved called");
 	serverMove = true;
+	promotedTo = promote;
 	opp.click();
-	pos.click();
+	pos.click();	
 	serverMove = false;
 }
 

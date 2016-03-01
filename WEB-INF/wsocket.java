@@ -25,16 +25,9 @@ public class wsocket {
 	@OnOpen
 	public void onOpen(final Session session) throws IOException, EncodeException{
 		System.out.println("client connected");
-		if(sessions.size() == 2) {
-			JsonObject json = Json.createObjectBuilder().add("notify", "sessionOverflow").add("count",sessions.size()).build();
-			session.getBasicRemote().sendText(json.toString());
-			session.close();
-		}
-		else {
-			sessions.add(session);
-		}
-		//JsonObject json = Json.createObjectBuilder().add("notify", "clientConnected").add().build();
-		//session.getBasicRemote().sendText(json.toString());
+		
+		sessions.add(session);
+		
 	}
 	
 	@OnMessage
@@ -72,6 +65,9 @@ public class wsocket {
 					assignPlayers();
 					break;
 				case "clientMoveMade" :					
+					notify(message, session, "opponent");
+					break;
+				case "resign" :
 					notify(message, session, "opponent");
 					break;
 		}
@@ -129,6 +125,7 @@ public class wsocket {
 				break;
 
 			case "opponent":
+				System.out.println("notifying oppoenent");
 				opponent.getBasicRemote().sendText(message);
 				break;
 
@@ -151,8 +148,13 @@ public class wsocket {
 
 
 	@OnClose
-	public void onClose(Session session) {
+	public void onClose(Session session) throws IOException {
 		System.out.println("Connection close");
+		for(Session s: sessions) {
+			if(s != session) {
+				s.getBasicRemote().sendText("{\"notify\":\"clientDisconnected\",\"username\":\""+ session.getUserProperties().get("username")+"\"}");
+			}
+		}
 		sessions.remove(session);
 	}
 

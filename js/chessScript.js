@@ -7,26 +7,40 @@ var onmove = false;
 var fallenPieces = [];
 var restart = false;
 var castling = false;
+var promotedTo;
 var track = {whiterook1:false,whiterook2:false,whiteking1:false,blackrook1:false, blackrook2:false, blackking1:false};
 function startGame(src) {
 	if(!gameIn) {
+		if(!serverMove) {
+			return;
+		}
 		src.innerHTML = "Click here to Stop!" ;
 		gameIn = true;
 		chance = 'white';
 		//alert(track['whiterook1']);
 		addSquares(src);
 		addChessElements(src);
-		assignRequest();
+		//assignRequest();
+		
 	}
 	else {
+		var resigning = false;
+		if (!serverMove) {
+			if(!restart && !(resigning = confirm("Are you sure ? \nYou want to resign ?")) ){
+				return;
+			}
+		}
+		if (resigning) {
+			resignRequest();
+		}
+		resigning = false;
 		src.innerHTML = "Click here to Start!";
 		gameIn = false;
 		onmove = false;
 		pElem  = null;
 		removeSquares();
 		removeChessElements();
-		removeLeftPieces();
-		resignRequest();	
+		removeLeftPieces();	
 	}
 }
 
@@ -268,7 +282,7 @@ function moveElement(event, src) {
 
 
 	if(src.getAttribute("player") != chance && !onmove ) {
-		alert("Its your opponent's move");
+		//alert("Its your opponent's move");
 		stopEvent(event);
 		return;
 	}
@@ -340,9 +354,9 @@ function moveToThis(event, src) {
 				//	}
 				//}
 				if (myPlayer == chance) {
-					moveMade(pElem.getAttribute("id"), src.getAttribute("id"));	
+					moveMade(pElem.getAttribute("id"), src.getAttribute("id"), promotedTo);	
 				}
-				
+				promotedTo = null;
 				onmove = false;
 				clearSelection(pElem);
 				pElem = null;
@@ -368,8 +382,9 @@ function moveToThis(event, src) {
 						castle(pElem, src.childNodes[0]);
 						clearSelection(pElem);
 						if (myPlayer == chance) {
-							moveMade(pElem.getAttribute("id"), src.getAttribute("id"));	
+							moveMade(pElem.getAttribute("id"), src.getAttribute("id"), promotedTo);	
 						}		
+						promotedTo = null;
 						pElem = null;
 						
 						onmove = false;
@@ -398,8 +413,9 @@ function moveToThis(event, src) {
 				cutPiece(pElem, src.childNodes[0]);
 				clearSelection(pElem);
 				if (myPlayer == chance) {
-					moveMade(pElem.getAttribute("id"), src.getAttribute("id"));	
+					moveMade(pElem.getAttribute("id"), src.getAttribute("id"), promotedTo);	
 				}
+				promotedTo= null;
 				
 				pElem = null;
 				
@@ -430,7 +446,6 @@ function isEnpassant(to, player) {
 			}
 		}
 	}
-
 	return result;
 }
 
@@ -444,16 +459,23 @@ function promotion(src) {
 	var choice ;
 	var player = src.getAttribute('player');
 	var array = ['queen', 'rook', 'bishop', 'knight'];
-	while(!choiceMade) {
-		choice = prompt("Enter the choice for promotion:\nQueen\nKnight\nBishop\nRook");
-		choice = choice.toLowerCase();
-		if(array.indexOf(choice) > -1) {
-			choiceMade = true;
+	if(!serverMove) {
+		while(!choiceMade) {
+			choice = prompt("Enter the choice for promotion:\nQueen\nKnight\nBishop\nRook");
+			choice = choice.toLowerCase();
+			if(array.indexOf(choice) > -1) {
+				choiceMade = true;
+			}
 		}
 	}
+	else {
+		choice = promotedTo;
+	}
+	promotedTo = null;
 	src.setAttribute("src","img/"+player+titleCase(choice)+".png");
 	src.setAttribute("class", "piece "+choice+" "+player);
 	src.setAttribute("piece",choice);
+	promotedTo = choice;
 }
 
 
