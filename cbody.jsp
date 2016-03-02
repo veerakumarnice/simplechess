@@ -7,8 +7,9 @@
 </tbody>
 </table>
 <div class="container">
-	<div class ="left" id="leftboard">
-		
+	<div class ="left" >
+		<div  id="leftboard"></div>
+		<div  id="moveboard"></div>
 	</div>
 	<div class="board"> 
 		<table id="chessTable" class="cboard">
@@ -19,10 +20,12 @@
 	<div class = "right">
 	<h3>Event Board</h3>
 	<div class="chatContainer">
-		<select id="chatlist" onchange="console.log(this.value)">
-			<option value="none"> ------Select----- </option>
-		</select>
-		<button onclick="inviteRequest(document.getElementById('chatlist').value)">Invite</button>
+		<div id="chatlist" onchange="console.log('values changed')">
+			
+		</div>
+		<!--button onclick="inviteRequest(document.getElementById('chatlist').value)">Invite</button-->
+		<!--div class="chatMember" value="veerakumarnice@gmail.com">veerakumarnice@gmail.com
+		</div-->
 	</div>
 	<button onclick="getUsers()">Refresh List</button>
 	</div>
@@ -36,7 +39,7 @@
 <script type="text/javascript">
 	window.onbeforeunload = function(event)
     {
-        return confirm("Confirm refresh");
+        return "All your progress will be lost?"
     };
 
 </script>

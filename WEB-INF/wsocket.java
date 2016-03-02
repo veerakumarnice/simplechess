@@ -16,9 +16,9 @@ import java.util.*;
 
 @ServerEndpoint(value="/wsocket/{user}")
 public class wsocket {
-
+	private static Set<gameHandler> activeGames = new Collections.synchronizedSet(new HashSet<gameHandler>(); 
 	private static boolean turn = true;
-	private static boolean assigned = false;
+	//private static boolean assigned = false;
 	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
 	private Session opponent;
 
@@ -184,12 +184,40 @@ public class wsocket {
 			JsonObject json = Json.createObjectBuilder().add("notify","playerAssigned").add("player",playerTurn).build();
 			s.getBasicRemote().sendText(json.toString());
 		}
-		assigned = true;
+		//assigned = true;
 	}
 
 	private static Set<Session> getPlayerList() {
 		return sessions;
 	}
+}
 
+class gameHandler {
+	private String p1uname;
+	private String p2uname;
+	private Set<Session> player1;
+	private Set<Session> player2;
+	private Set<Session> broadcastList;
+	private boolean gameStarted;
+	public gameHandler(Session starter) {
+		player1 = new HashSet<Session>();
+		player2 = new HashSet<Session>();
+		player1.add(starter);
+		p1uname = player1.getUserProperties().get("username");
+	}
+
+	public void secondPlayer(Session second) {
+		if(player2.size() == 0){
+			if (gameStarted && p2uname.equals()) {
+
+			}
+			else {
+				
+			}
+		}
+		else {
+			
+		}
+	}
 
 }

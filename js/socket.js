@@ -8,8 +8,8 @@ var username;
 })();
 
 
-var ws = new WebSocket("ws://localhost:8080/simplechess/wsocket/"+username);
-ws.onopen = function() {	
+var ws = new WebSocket("ws://veera-pt988:8080/simplechess/wsocket/"+username);
+ws.onopen = function() {
 	ws.send(JSON.stringify({ notify : 'clientConnected', username: username}));
 	getUsers();
 	console.log("connection opened");
@@ -34,7 +34,7 @@ ws.onmessage = function(message) {
 				ws.send(JSON.stringify({notify:'acceptInvitation',username: username, opp:json.username,status:"yes"}));
 			}
 			else {
-				ws.send(JSON.stringify({notify:'acceptInvitation',username:json.username, status: "no"}));
+				ws.send(JSON.stringify({notify:'acceptInvitation',username:json.username, opp:json.username, status: "no"}));
 			}
 			break;
 		case "inviteStatus" :
@@ -46,6 +46,9 @@ ws.onmessage = function(message) {
 				document.getElementById('btn').click();
 				serverMove = false;
 			}
+			else {
+				console.log("rejected invitation");
+			}
 			break;
 		case "initiateGame" :
 			myPlayer = json.player;
@@ -56,16 +59,22 @@ ws.onmessage = function(message) {
 			break;
 		case "clientDisconnected" :
 			var sel = document.getElementById('chatlist').childNodes;
+			console.log("disconnection recognized");
 			for (var x in sel) {
 				if(sel[x].value == json.username ) {
+					console.log("child found");
 					sel[x].parentNode.removeChild(sel[x]);
 					return;
 				}
 			}
 			break;
 		case "clientConnected" :
+
 			var sel = document.getElementById("chatlist");
-			var el = document.createElement("option");
+			var el = document.createElement("div");
+			el.setAttribute("class","chatMember");
+			el.setAttribute("onclick","inviteRequest(this.value)");
+			el.setAttribute("value",json.username);
 			el.value = json.username;
 			el.innerHTML = json.username;
 			sel.appendChild(el);
@@ -104,10 +113,7 @@ function inviteRequest(opp) {
 		alert("You must resign your current Game to invite another player");
 		return;
 	}
-	if(opp != "none"){
-		ws.send(JSON.stringify({notify:"inviteRequest",username:username,invite:opp}));	
-	}
-	
+	ws.send(JSON.stringify({notify:"inviteRequest",username:username,invite:opp}));	
 }
 
 function assignRequest() {
@@ -143,14 +149,15 @@ function resignRequest() {
 
 function showUsers(usersArray) {
 	var list = document.getElementById('chatlist');
-	list.innerHTML = "";
-	var sel = document.createElement("option");
-	sel.innerHTML = " ------Select----- ";
-	list.appendChild(sel);
+	while (list.firstChild) {
+		list.removeChild(list.firstChild);
+	}
 	for(var u in usersArray ) {
 		if(usersArray[u] != username) {
-			var node = document.createElement("option");
+			var node = document.createElement("div");
 			node.setAttribute("value", usersArray[u]);
+			node.setAttribute("class","chatMember");
+			node.setAttribute("onclick","inviteRequest(this.value)");
 			node.innerHTML = usersArray[u];
 			list.appendChild(node);
 		}
