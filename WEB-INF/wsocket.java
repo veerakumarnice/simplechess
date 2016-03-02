@@ -16,15 +16,20 @@ import java.util.*;
 
 @ServerEndpoint(value="/wsocket/{user}")
 public class wsocket {
-	private static Set<gameHandler> activeGames = new Collections.synchronizedSet(new HashSet<gameHandler>(); 
+	private static Set<GameHandler> activeGames = Collections.synchronizedSet(new HashSet<GameHandler>()); 
 	private static boolean turn = true;
 	//private static boolean assigned = false;
 	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
 	private Session opponent;
 
 	@OnOpen
-	public void onOpen(final Session session) throws IOException, EncodeException{
-		System.out.println("client connected");
+	public void onOpen(final Session session, @PathParam("user") final String user) throws IOException, EncodeException{
+		System.out.println("client connected" + user);
+		//System.out.println("New Client connected :" +json.getString("username"));
+		session.getUserProperties().put("username", user);
+
+		System.out.println("username set to " + user);
+		notify("{\"notify\":\"clientConnected\",\"username\":\""+user+"\"}", session, "all");
 		
 		sessions.add(session);
 		
@@ -49,12 +54,15 @@ public class wsocket {
 					System.out.println("Sent active users list to " + json.getString("username")) ;
 					break;
 				case "inviteRequest" :
+					activeGames.add(new GameHandler(session, json.getString("invite")));
 					startGame(json.getString("username"), json.getString("invite"));
+
 					break;
 				case "acceptInvitation" :
 					if (json.getString("status").equals("yes")){
 						setOppenent(json.getString("opp"));
 						inviteStatus(json.getString("username"), json.getString("opp"), "yes");
+						addTOGameHandler(session, json.getString("opp"));
 						session.getBasicRemote().sendText("{\"notify\":\"initiateGame\",\"opponent\":\""+json.getString("opp")+"\""+ ","+"\"player\":\"black\"}");
 					}
 					else {
@@ -64,7 +72,7 @@ public class wsocket {
 				case "assignPlayers" :
 					assignPlayers();
 					break;
-				case "clientMoveMade" :					
+				case "clientMoveMade" :				
 					notify(message, session, "opponent");
 					break;
 				case "resign" :
@@ -78,6 +86,21 @@ public class wsocket {
 			if(s.getUserProperties().get("username").equals(opp)) {
 				opponent = s;
 				return;
+			}
+		}
+	}
+
+	private void addTOGameHandler(Session mySession, String otherPlayer) {
+
+		for(GameHandler g: activeGames) {
+			String p1 = g.getPlayer1();
+			String p2 = g.getPlayer2();
+			String thisPlayer = (String)mySession.getUserProperties().get("username");
+			if(otherPlayer.equals(p1) && p2.equals(thisPlayer)) {
+				g.addSecondPlayer(mySession);
+			}
+			else if(otherPlayer.equals(p2) && p1.equals(thisPlayer)) {
+				g.addFirstPlayer(mySession);
 			}
 		}
 	}
@@ -97,7 +120,7 @@ public class wsocket {
 	}
 
 	private boolean startGame(String myPlayer, String opp) throws IOException {
-		setOppenent(opp);
+		setOppenent(opp);		
 		opponent.getBasicRemote().sendText(inviteToGame(myPlayer));
 		return true;
 	}
@@ -134,10 +157,11 @@ public class wsocket {
 	}
 
 	private JsonObject getActiveUsers(Session session) throws IOException {
-	
+		System.out.println("function getUsers called ");
 		Set<Session> list = getPlayerList();
 		JsonArrayBuilder object = Json.createArrayBuilder();
 		for(Session s : list) {
+			System.out.println("trying to add " + s.getUserProperties().get("username"));
 			object.add((String)s.getUserProperties().get("username"));
 		}
 		JsonArray array = object.build();
@@ -192,32 +216,74 @@ public class wsocket {
 	}
 }
 
-class gameHandler {
+class GameHandler {
+
 	private String p1uname;
 	private String p2uname;
 	private Set<Session> player1;
 	private Set<Session> player2;
 	private Set<Session> broadcastList;
 	private boolean gameStarted;
-	public gameHandler(Session starter) {
+	public GameHandler(Session starter, String opponent) {
+		System.out.println("gameHandler initiated");
 		player1 = new HashSet<Session>();
 		player2 = new HashSet<Session>();
+		broadcastList = new HashSet<Session>();
 		player1.add(starter);
-		p1uname = player1.getUserProperties().get("username");
+		p1uname = (String)starter.getUserProperties().get("username");
+		p2uname = opponent;
+		System.out.println("gameHandler for player one done");
 	}
 
-	public void secondPlayer(Session second) {
-		if(player2.size() == 0){
-			if (gameStarted && p2uname.equals()) {
+	public void addSecondPlayer(Session second) {
+		if (p2uname.equals(second.getUserProperties().get("username"))) {
+			if(player2.size() == 0){
+				if (gameStarted) {
+					player2.add(second);
+					System.out.println("gameHandler resumes player two");
+				}
+				else {
+					player2.add(second);
+					p2uname = (String)second.getUserProperties().get("username");
+					gameStarted = true;
+					System.out.println("gameHandler adds player two");
+				}
+			}
+			else {
+			
+			}
 
+		}
+
+		
+	}
+	public void addFirstPlayer(Session first) {
+		if (p1uname.equals(first.getUserProperties().get("username"))) {
+			if(player1.size() == 0){
+				if (gameStarted && p1uname.equals(first.getUserProperties().get("username"))) {
+					player1.add(first);
+					System.out.println("gameHandler resumes player  one");
+				}
+				else {
+					player1.add(first);
+					gameStarted = true;
+					System.out.println("gameHandler adds player  one\nAnd this is unusal you have to check this issue loop hole");
+				}
 			}
 			else {
 				
 			}
 		}
-		else {
-			
-		}
 	}
+	public String getPlayer1() {
+		return p1uname;
+	}
+
+	public String getPlayer2() {
+		return p2uname;
+	}
+
+
+
 
 }

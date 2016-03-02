@@ -10,7 +10,7 @@ var username;
 
 var ws = new WebSocket("ws://veera-pt988:8080/simplechess/wsocket/"+username);
 ws.onopen = function() {
-	ws.send(JSON.stringify({ notify : 'clientConnected', username: username}));
+	//ws.send(JSON.stringify({ notify : 'clientConnected', username: username}));
 	getUsers();
 	console.log("connection opened");
 	connected = true;
