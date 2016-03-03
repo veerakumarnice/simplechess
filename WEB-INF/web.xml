@@ -97,6 +97,22 @@
      <servlet-name>chess</servlet-name>
      <url-pattern>/chess</url-pattern>
     </servlet-mapping>
+    <servlet>
+      <servlet-name>broadCastList</servlet-name>
+      <jsp-file>/broadCastList.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+     <servlet-name>broadCastList</servlet-name>
+     <url-pattern>/broadCastList</url-pattern>
+    </servlet-mapping>
+    <servlet>
+      <servlet-name>broadCast</servlet-name>
+      <jsp-file>/broadCast.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+     <servlet-name>broadCast</servlet-name>
+     <url-pattern>/broadCast</url-pattern>
+    </servlet-mapping>
 
 
 </web-app>

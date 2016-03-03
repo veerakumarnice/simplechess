@@ -46,7 +46,7 @@ public class Bean extends HttpServlet{
 		if(action.equals("login")) {
 			if(!loginExist(request.getSession())) {
 				user = request.getParameter("email"); 
-				pass = request.getParameter("pass");
+				pass = request.getParameter("pass1");
 				login(user, pass, request, response);
 				//System.out.println("login after that");
 				return;
@@ -54,7 +54,7 @@ public class Bean extends HttpServlet{
 		}
 		else if(action.equals("signup")) {
 			user = request.getParameter("email"); 
-			pass = request.getParameter("pass");
+			pass = request.getParameter("pass1");
 			String firstname = request.getParameter("firstname");
 			String lastname = request.getParameter("lastname");
 			if(!userExist(user)) {

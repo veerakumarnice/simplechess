@@ -857,6 +857,4 @@ function cutPiece(attacker, fallen) {
 	if(target.childNodes[0].getAttribute('piece') == 'pawn' && ( to%10 == 1  || to%10 == 8  ) ){
 		promotion(pElem);
 	}
-
-
 }

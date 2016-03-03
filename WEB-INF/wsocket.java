@@ -16,6 +16,7 @@ import java.util.*;
 
 @ServerEndpoint(value="/wsocket/{user}")
 public class wsocket {
+
 	private static Set<GameHandler> activeGames = Collections.synchronizedSet(new HashSet<GameHandler>()); 
 	private static boolean turn = true;
 	//private static boolean assigned = false;
@@ -43,8 +44,13 @@ public class wsocket {
 		JsonObject json =  jreader.readObject();
 		jreader.close();
 		if(json.getString("username").equals(user)) {
+				System.out.println("username satisfied");
 			switch (json.getString("notify")) {
+
 				case "clientConnected":
+					if(json.getString("username").equals("broadCastList")) {
+						return;
+					}
 					System.out.println("New Client connected :" +json.getString("username"));
 					session.getUserProperties().put("username",json.getString("username"));
 					System.out.println(json);
@@ -81,11 +87,25 @@ public class wsocket {
 				case "resign" :
 					gameHandler.notify( user, json);//notify(message, session, "opponent");
 					break;
+				case "broadCastListNeeded" :
+					session.getBasicRemote().sendText(listActiveGames().toString());
+					break;				
 			}
 		}
 		else {
 			System.out.println("malpractice identified");
 		}
+	}
+
+	private JsonObject listActiveGames() {
+		JsonObjectBuilder object = Json.createObjectBuilder();
+		JsonArrayBuilder array = Json.createArrayBuilder();
+		for(GameHandler g : activeGames) {			
+			array.add(Json.createObjectBuilder().add("player1",g.getPlayer1())
+				.add("player2", g.getPlayer2()).add("startTime",g.getStartTime().toString()).add("active",g.getPlayerStatus()).build());
+		}
+		object.add("notify","broadCastList").add("list",array.build());
+		return object.build();
 	}
 
 	private void setOppenent(String opp) {
@@ -166,9 +186,15 @@ public class wsocket {
 		System.out.println("function getUsers called ");
 		Set<Session> list = getPlayerList();
 		JsonArrayBuilder object = Json.createArrayBuilder();
+		Set<String> added = new HashSet<String>();
 		for(Session s : list) {
-			System.out.println("trying to add " + s.getUserProperties().get("username"));
-			object.add((String)s.getUserProperties().get("username"));
+			String presentUsername = (String)s.getUserProperties().get("username");
+			
+			if (!added.contains(presentUsername)) {
+				System.out.println("trying to add " + presentUsername);
+				object.add(presentUsername);
+				added.add(presentUsername);
+			}
 		}
 		JsonArray array = object.build();
 		JsonObject json = Json.createObjectBuilder().add("notify","activeUsers").add("users",array).build();
@@ -230,7 +256,7 @@ class GameHandler {
 	private Set<Session> player2;
 	private Set<Session> broadcastList;
 	private boolean gameStarted;
-
+	private Date startTime;
 	public GameHandler(Session starter, String opponent) {
 		System.out.println("gameHandler initiated");
 		player1 = new HashSet<Session>();
@@ -239,6 +265,7 @@ class GameHandler {
 		player1.add(starter);
 		p1uname = (String)starter.getUserProperties().get("username");
 		p2uname = opponent;
+		startTime = new Date();
 		System.out.println("gameHandler for player one done");
 	}
 
@@ -291,6 +318,26 @@ class GameHandler {
 		return p2uname;
 	}
 
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	public String getPlayerStatus() {
+		if(player1.size() >0 && player2.size() > 0) {
+			return "both";
+		}
+		else if (player1.size() >0 && player2.size() == 0) {
+			return "player1";
+		}
+		else if (player1.size() == 0 && player2.size() > 0) {
+			return "player2";
+		}
+		else if (player1.size() == 0 && player2.size() == 0) {
+			return "none";
+		}
+		return null;
+	}
+
 	public void notify(String username, JsonObject message) throws IOException {
 		Set<Session> target;
 		if(username.equals(p1uname)) {
@@ -311,4 +358,29 @@ class GameHandler {
 			sub.getBasicRemote().sendText(message.toString());
 		}
 	}
+}
+
+class Game {
+	HashMap<String, Integer> presentState;
+}
+
+class Piece {
+	String type;
+	int position;
+	public Piece(String t, int p) {
+		type = t;
+		position = p;
+	}
+
+	public boolean cuts(Piece fallen) {
+		return false;
+	}
+
+	public boolean movesTo(int fallen) {
+		return false;
+	}
+}
+
+class Move {
+
 }

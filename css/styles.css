@@ -131,12 +131,12 @@ div.board {
 
 button.button {
 	position: initial;
-	background-color: #00A8A8;
+	background-color: #DA5656;
 	display: inline-block;
-	padding: 8px 15px;
-	border-radius: 10px;
+	font-size: 1em;
+	border-radius: 8px;
 	color: rgba(255, 255, 255,1);
-	transition-duration: 0.4s;
+	transition-duration: 0.2s;
 }
 
 button.button:hover {
@@ -302,4 +302,18 @@ div.container {
 .chat .top .chatClose:hover {
 	background-color: white;
 	color:#00A8A8;
+}
+
+#broadCastContainer {
+	margin: 30px;
+}
+
+.broadCastItem {
+	background-color: orange;
+	color: white;
+	width: 200px;
+	height: 200px;
+	font-size: 0.8em;
+	float: left;
+	margin: 20px;
 }
