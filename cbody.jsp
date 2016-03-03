@@ -35,6 +35,11 @@
 <div class="start" >
 	<button id="btn" class="button" onclick="startGame(this)" >Click here to Start! </button>
 </div>
+<div class="chatholder"><div>
+<div id="chatboxcontainer" class="chatBoxContainer">
+		
+	
+</div>
 <script src="js/chessScript.js" type="text/javascript"></script>
 <script type="text/javascript">
 	window.onbeforeunload = function(event)

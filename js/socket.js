@@ -81,13 +81,12 @@ ws.onmessage = function(message) {
 						break;
 					}
 				}
-
 			}
 			
 			if(!found) {
 				var el = document.createElement("div");
 				el.setAttribute("class","chatMember");
-				el.setAttribute("onclick","inviteRequest(this)");
+				el.setAttribute("onclick","addChatBox(this)");
 				el.setAttribute("value",json.username);
 				el.value = json.username;
 				el.innerHTML = json.username;
@@ -123,8 +122,9 @@ function sendMessage(source) {
 		document.getElementById('textmessage').value = "" ;
 }
 
-function inviteRequest(opp) {
+function inviteRequest(opponent) {
 	//console.log("ivite request vlue as opp : "+opp.getAttribute("value"));
+	opp = opponent.parentNode.parentNode;
 	if(gameIn) {
 		alert("You must resign your current Game to invite another player");
 		return;
@@ -173,9 +173,91 @@ function showUsers(usersArray) {
 			var node = document.createElement("div");
 			node.setAttribute("value", usersArray[u]);
 			node.setAttribute("class","chatMember");
-			node.setAttribute("onclick","inviteRequest(this)");
+			node.setAttribute("onclick","addChatBox(this)");
 			node.innerHTML = usersArray[u];
 			list.appendChild(node);
 		}
 	}
+}
+
+function addChatBox(opponent) {
+
+	var oppoUser  = opponent.getAttribute("value");
+	var existingChatBoxes = document.getElementsByClassName("chat");
+	var existingBox;
+	if (existingChatBoxes.length > 0 && (existingBox = chatBoxPresent(oppoUser, existingChatBoxes))) {
+			highLightBox(existingBox);
+			return;
+	}
+
+	var divElem = document.createElement("div");
+	divElem.setAttribute("class", "chat");
+	divElem.setAttribute("value" , oppoUser);
+
+	var innerDiv1 = document.createElement("div");
+	innerDiv1.setAttribute("class", "top");
+	innerDiv1.setAttribute("onclick", "minimizeChat(this)");
+	
+	var innerSpan1 = document.createElement("span");
+	innerSpan1.innerHTML = oppoUser;
+	innerDiv1.appendChild(innerSpan1);
+		
+	var innerSpan2 = document.createElement("span");
+	innerSpan2.innerHTML = "x";
+	innerSpan2.setAttribute("class", "chatClose");
+	innerSpan2.setAttribute("onclick","closeChatBox(this)");
+	innerDiv1.appendChild(innerSpan2);
+	divElem.appendChild(innerDiv1);
+
+	var innerDiv2 = document.createElement("div");
+	innerDiv2.setAttribute("class","chatMessages");
+	
+	var invBut = document.createElement("button");
+	invBut.innerHTML = "invite";
+	invBut.setAttribute("class", "inviteButton");
+	invBut.setAttribute("onclick","inviteRequest(this)");
+	innerDiv2.appendChild(invBut);
+		
+	var textInput = document.createElement("input");
+	textInput.setAttribute("class", "chatinput");
+	textInput.setAttribute("type", "text");
+	textInput.setAttribute("placeholder", "Enter message");
+	innerDiv2.appendChild(textInput);
+	divElem.appendChild(innerDiv2);
+	document.getElementById("chatboxcontainer").appendChild(divElem);
+
+}
+
+function chatBoxPresent(uname, list) {
+	for(var x in list) {
+		if(list[x].getAttribute("value") == uname) {
+			return list[x];
+		}
+	}
+}
+
+function minimizeChat(source) {
+	var target = source.parentNode.getElementsByClassName('chatMessages')[0];
+	if(target.style.display == "none") {
+		target.style.display = "block";
+	}
+	else {
+		target.style.display = "none";
+	}
+	/*if(target.style.height == "0px") {
+		console.log("height not equal to 0");
+		target.style.height = 0;
+	}
+	else {
+
+	} */
+}
+
+function closeChatBox(source) {
+	var target = source.parentNode.parentNode;
+	target.parentNode.removeChild(target);
+}
+
+function highLightBox(box) {
+
 }
