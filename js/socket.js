@@ -34,7 +34,7 @@ ws.onmessage = function(message) {
 				ws.send(JSON.stringify({notify:'acceptInvitation',username: username, opp:json.username,status:"yes"}));
 			}
 			else {
-				ws.send(JSON.stringify({notify:'acceptInvitation',username:json.username, opp:json.username, status: "no"}));
+				ws.send(JSON.stringify({notify:'acceptInvitation',username:username, opp:json.username, status: "no"}));
 			}
 			break;
 		case "inviteStatus" :
@@ -61,7 +61,7 @@ ws.onmessage = function(message) {
 			var sel = document.getElementById('chatlist').childNodes;
 			console.log("disconnection recognized");
 			for (var x in sel) {
-				if(sel[x].value == json.username ) {
+				if(sel[x].getAttribute("value") == json.username ) {
 					console.log("child found");
 					sel[x].parentNode.removeChild(sel[x]);
 					return;
@@ -71,13 +71,28 @@ ws.onmessage = function(message) {
 		case "clientConnected" :
 
 			var sel = document.getElementById("chatlist");
-			var el = document.createElement("div");
-			el.setAttribute("class","chatMember");
-			el.setAttribute("onclick","inviteRequest(this.value)");
-			el.setAttribute("value",json.username);
-			el.value = json.username;
-			el.innerHTML = json.username;
-			sel.appendChild(el);
+			var chatChilds = sel.childNodes;
+			//console.log(sel);
+			var found = false;
+			if(chatChilds.length != 0) {
+				for(var x in chatChilds) {
+					if (chatChilds[x].getAttribute("value") == json.username) {
+						found = true;
+						break;
+					}
+				}
+
+			}
+			
+			if(!found) {
+				var el = document.createElement("div");
+				el.setAttribute("class","chatMember");
+				el.setAttribute("onclick","inviteRequest(this)");
+				el.setAttribute("value",json.username);
+				el.value = json.username;
+				el.innerHTML = json.username;
+				sel.appendChild(el);			
+			}
 			break;
 
 		case "resign" :
@@ -109,11 +124,12 @@ function sendMessage(source) {
 }
 
 function inviteRequest(opp) {
+	//console.log("ivite request vlue as opp : "+opp.getAttribute("value"));
 	if(gameIn) {
 		alert("You must resign your current Game to invite another player");
 		return;
 	}
-	ws.send(JSON.stringify({notify:"inviteRequest",username:username,invite:opp}));	
+	ws.send(JSON.stringify({notify:"inviteRequest",username:username,invite:opp.getAttribute("value")}));	
 }
 
 function assignRequest() {
@@ -157,7 +173,7 @@ function showUsers(usersArray) {
 			var node = document.createElement("div");
 			node.setAttribute("value", usersArray[u]);
 			node.setAttribute("class","chatMember");
-			node.setAttribute("onclick","inviteRequest(this.value)");
+			node.setAttribute("onclick","inviteRequest(this)");
 			node.innerHTML = usersArray[u];
 			list.appendChild(node);
 		}

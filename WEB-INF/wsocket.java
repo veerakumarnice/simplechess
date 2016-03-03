@@ -21,6 +21,7 @@ public class wsocket {
 	//private static boolean assigned = false;
 	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
 	private Session opponent;
+	private GameHandler gameHandler;
 
 	@OnOpen
 	public void onOpen(final Session session, @PathParam("user") final String user) throws IOException, EncodeException{
@@ -41,8 +42,8 @@ public class wsocket {
 		JsonReader jreader = Json.createReader(new StringReader(message));
 		JsonObject json =  jreader.readObject();
 		jreader.close();
-
-		switch (json.getString("notify")) {
+		if(json.getString("username").equals(user)) {
+			switch (json.getString("notify")) {
 				case "clientConnected":
 					System.out.println("New Client connected :" +json.getString("username"));
 					session.getUserProperties().put("username",json.getString("username"));
@@ -54,7 +55,8 @@ public class wsocket {
 					System.out.println("Sent active users list to " + json.getString("username")) ;
 					break;
 				case "inviteRequest" :
-					activeGames.add(new GameHandler(session, json.getString("invite")));
+					gameHandler = new GameHandler(session, json.getString("invite"));
+					activeGames.add(gameHandler);
 					startGame(json.getString("username"), json.getString("invite"));
 
 					break;
@@ -73,11 +75,16 @@ public class wsocket {
 					assignPlayers();
 					break;
 				case "clientMoveMade" :				
-					notify(message, session, "opponent");
-					break;
+					
+				//	notify(message, session, "opponent");
+				//	break;
 				case "resign" :
-					notify(message, session, "opponent");
+					gameHandler.notify( user, json);//notify(message, session, "opponent");
 					break;
+			}
+		}
+		else {
+			System.out.println("malpractice identified");
 		}
 	}
 
@@ -98,9 +105,11 @@ public class wsocket {
 			String thisPlayer = (String)mySession.getUserProperties().get("username");
 			if(otherPlayer.equals(p1) && p2.equals(thisPlayer)) {
 				g.addSecondPlayer(mySession);
+				gameHandler = g;
 			}
 			else if(otherPlayer.equals(p2) && p1.equals(thisPlayer)) {
 				g.addFirstPlayer(mySession);
+				gameHandler = g;
 			}
 		}
 	}
@@ -125,9 +134,6 @@ public class wsocket {
 		return true;
 	}
 
-/*	private JsonObject initiateGame() {
-
-	}*/
 
 	private String inviteToGame(String myPlayer) {
 		JsonObject json = Json.createObjectBuilder().add("notify","inviteRequest").add("username",myPlayer).build();
@@ -224,6 +230,7 @@ class GameHandler {
 	private Set<Session> player2;
 	private Set<Session> broadcastList;
 	private boolean gameStarted;
+
 	public GameHandler(Session starter, String opponent) {
 		System.out.println("gameHandler initiated");
 		player1 = new HashSet<Session>();
@@ -250,13 +257,12 @@ class GameHandler {
 				}
 			}
 			else {
-			
+				player2.add(second);
+				System.out.println("gameHandler adds and extra session for the second player");
 			}
-
 		}
-
-		
 	}
+
 	public void addFirstPlayer(Session first) {
 		if (p1uname.equals(first.getUserProperties().get("username"))) {
 			if(player1.size() == 0){
@@ -271,10 +277,12 @@ class GameHandler {
 				}
 			}
 			else {
-				
+				player1.add(first);
+				System.out.println("gameHandler adds and extra session for the first player");
 			}
 		}
 	}
+
 	public String getPlayer1() {
 		return p1uname;
 	}
@@ -283,7 +291,24 @@ class GameHandler {
 		return p2uname;
 	}
 
+	public void notify(String username, JsonObject message) throws IOException {
+		Set<Session> target;
+		if(username.equals(p1uname)) {
+			target = player2;
+		}
+		else if(username.equals(p2uname)) {
+			target = player1;
+		}
+		else {
+			return;
+		}
 
+		for(Session s : target) {
+			s.getBasicRemote().sendText(message.toString());
+		}
 
-
+		for(Session sub : broadcastList) {
+			sub.getBasicRemote().sendText(message.toString());
+		}
+	}
 }
