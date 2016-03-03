@@ -1,20 +1,23 @@
 * {
 	box-sizing: border-box;
+	font-family:Oxygen,Helvetica, Times,sans-serif ;
 
 }
 
 h1 {
 	text-align: center;
 	position: relative;
+	float: left;
 	margin:auto;
 	color: white;
 	padding-top: 3px;
 	box-shadow: 1px #fff;
+
 }
 
 body {
 	background-color: #F5F1F1;
-	font-family:Oxygen,Helvetica, Times,sans-serif ;
+	
 }
 
 section {
@@ -316,4 +319,47 @@ div.container {
 	font-size: 0.8em;
 	float: left;
 	margin: 20px;
+	padding:7px;
+}
+
+.broadCastItem:hover {
+	cursor: pointer;
+	box-shadow: 0px 0px 10px 1px black; ;
+}
+
+
+
+#headlistcontainer {
+	position: absolute;
+	color: white;
+	height: 100%;	
+	top: 5px;
+	margin-left: 10px;
+}
+
+.headlist {	
+	background-color: #DA5656;
+	padding: 10px;
+	margin:auto;	
+	color: white;
+}
+
+.headlist:hover {
+	background-color: white;
+	color:#DA5656 ;
+	cursor: pointer;
+
+}
+
+a {
+	text-decoration: none;
+}
+
+#heading {
+	color: white;
+	font-size: 1.5em;
+	margin-left: auto;
+	margin-right: auto;
+	display: inline-block;
+	margin-left:100px;
 }

@@ -29,11 +29,13 @@ public class wsocket {
 		System.out.println("client connected" + user);
 		//System.out.println("New Client connected :" +json.getString("username"));
 		session.getUserProperties().put("username", user);
-
 		System.out.println("username set to " + user);
-		notify("{\"notify\":\"clientConnected\",\"username\":\""+user+"\"}", session, "all");
 		
-		sessions.add(session);
+		if(!user.equals("broadCastList")) {
+			sessions.add(session);
+			notify("{\"notify\":\"clientConnected\",\"username\":\""+user+"\"}", session, "all");
+		}
+		
 		
 	}
 	
@@ -48,8 +50,8 @@ public class wsocket {
 			switch (json.getString("notify")) {
 
 				case "clientConnected":
-					if(json.getString("username").equals("broadCastList")) {
-						return;
+					if(json.getString("username") == ("broadCastList") ) {
+						break;
 					}
 					System.out.println("New Client connected :" +json.getString("username"));
 					session.getUserProperties().put("username",json.getString("username"));
@@ -176,9 +178,7 @@ public class wsocket {
 			case "opponent":
 				System.out.println("notifying oppoenent");
 				opponent.getBasicRemote().sendText(message);
-				break;
-
-			
+				break;			
 		}			
 	}
 
@@ -190,7 +190,7 @@ public class wsocket {
 		for(Session s : list) {
 			String presentUsername = (String)s.getUserProperties().get("username");
 			
-			if (!added.contains(presentUsername)) {
+			if (!added.contains(presentUsername) && !presentUsername.equals("broadCastList")) {
 				System.out.println("trying to add " + presentUsername);
 				object.add(presentUsername);
 				added.add(presentUsername);
@@ -206,6 +206,10 @@ public class wsocket {
 	@OnClose
 	public void onClose(Session session) throws IOException {
 		System.out.println("Connection close");
+		if(session.getUserProperties().get("username").equals("broadCastList")) {
+			System.out.println("Session broadcast closing");
+			return;
+		}
 		for(Session s: sessions) {
 			if(s != session) {
 				s.getBasicRemote().sendText("{\"notify\":\"clientDisconnected\",\"username\":\""+ session.getUserProperties().get("username")+"\"}");
@@ -351,11 +355,17 @@ class GameHandler {
 		}
 
 		for(Session s : target) {
-			s.getBasicRemote().sendText(message.toString());
+			if(s.isOpen()) {
+				s.getBasicRemote().sendText(message.toString());	
+			}
+			
 		}
 
 		for(Session sub : broadcastList) {
-			sub.getBasicRemote().sendText(message.toString());
+			if(sub.isOpen()) {
+				sub.getBasicRemote().sendText(message.toString());	
+			}
+			
 		}
 	}
 }

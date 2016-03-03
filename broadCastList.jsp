@@ -8,11 +8,12 @@
 	<% String heading = "Simple Chess";%>
 	<%@ include file="header.jsp" %>
 	<div id="broadCastContainer">
-		<div class="broadCastItem">
-			
-		</div>
+		
 	</div>
 	
 	<script type="text/javascript" src="js/broadCast.js"></script>
+	<script>
+		
+	</script>
 </body>
 </html>

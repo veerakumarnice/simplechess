@@ -7,7 +7,6 @@
 	
 	<% String heading = "Simple Chess";%>
 	<%@ include file="header.jsp" %>
-		
 	<table>
 		<tbody>
 			<tr>

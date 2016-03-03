@@ -1,8 +1,11 @@
 <%@ page language="java" %>
 <header>
-		<h1>
-			<%=heading %>
-		</h1>
+		<div id="headlistcontainer">
+			<a href="home"><span id="home" class="headlist">Home</span></a>
+			<a href="broadCastList"><span id="broadcast" class="headlist">Broadcast</span></a>
+			<span id="heading"><%=heading %></span>
+		</div>
+				
 		<button id="lgout" onclick="logout(this)" class="button" value="Login"> 
 			<%
 				String user;
@@ -15,7 +18,8 @@
 
 
 		</button>
-		}
+		</div>
+		
 		<script> 
 			
 			var loggedin;

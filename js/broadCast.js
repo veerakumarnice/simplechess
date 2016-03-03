@@ -36,6 +36,9 @@ function createList(list) {
 		for(var x in list) {
 			var node = document.createElement("div");
 			node.setAttribute("class", "broadCastItem");
+			node.setAttribute("player1",list[x].player1);
+			node.setAttribute("player2", list[x].player2);
+			node.setAttribute("onclick", "broadcast(this)");
 			node.appendChild(newElement("div","Player 1 : "+list[x].player1 , ""));
 			node.appendChild(newElement("div","Player 2 : "+list[x].player2 , ""));
 			node.appendChild(newElement("div","Start Time : "+list[x].startTime , ""));
@@ -63,4 +66,8 @@ function movePiece(attacker, fallen) {
 	if(fallen.childNodes[0].getAttribute('piece') == 'pawn' && ( to%10 == 1  || to%10 == 8  ) ){
 		promotion(pElem);
 	}
+}
+
+function broadcast(game) {
+	window.location.href= "broadCast?player1="+game.getAttribute("player1")+"&player2="+game.getAttribute("player2");
 }
