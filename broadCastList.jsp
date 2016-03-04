@@ -11,7 +11,7 @@
 		
 	</div>
 	
-	<script type="text/javascript" src="js/broadCast.js"></script>
+	<script type="text/javascript" src="js/broadCastList.js"></script>
 	<script>
 		
 	</script>

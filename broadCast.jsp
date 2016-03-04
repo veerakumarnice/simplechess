@@ -4,7 +4,15 @@
 <%@ include file="head.jsp" %>
 
 <body>
-	
+	<%
+		String player1 = request.getParameter("player1");
+		String player2 = request.getParameter("player2");
+	%>
+	<script type="text/javascript">
+		var player1 = "<%=player1 %>";
+		var player2 = "<%=player2 %>";
+	</script>
+
 	<% String heading = "Simple Chess";%>
 	<%@ include file="header.jsp" %>
 	<table>
@@ -24,6 +32,8 @@
 				</table>
 			</div>
 		</div>
+
+		<span id="test"></span>
 		
 	<script type="text/javascript" src="js/broadCast.js"></script>
 </body>

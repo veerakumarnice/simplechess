@@ -6,10 +6,10 @@ var username;
 	}
 })();
 
-var ws = new WebSocket("ws://veera-pt988:8080/simplechess/wsocket/broadCast");
+var ws = new WebSocket("ws://veera-pt988:8080/simplechess/wsocket/broadCastList");
 ws.onopen = function() {
-	ws.send(JSON.stringify({ notify : 'broadCast', username:'broadCast', player1:player1, player2:player2}));
-	console.log("broadCast opened");
+	ws.send(JSON.stringify({ notify : 'broadCastListNeeded', username:'broadCastList'}));
+	console.log("broadCastList opened");
 };
 
 ws.onmessage = function(message) {
@@ -22,8 +22,8 @@ ws.onmessage = function(message) {
 				var fallen = document.getElementById(json.to);
 				movePiece(attacker, fallen);
 				break;
-		case "broadCastAccess" :
-			
+		case "broadCastList" :
+			createList(json.list);
 			break;
 	}
 }

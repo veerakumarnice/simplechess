@@ -19,6 +19,7 @@ public class wsocket {
 
 	private static Set<GameHandler> activeGames = Collections.synchronizedSet(new HashSet<GameHandler>()); 
 	private static boolean turn = true;
+
 	//private static boolean assigned = false;
 	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
 	private Session opponent;
@@ -30,8 +31,9 @@ public class wsocket {
 		//System.out.println("New Client connected :" +json.getString("username"));
 		session.getUserProperties().put("username", user);
 		System.out.println("username set to " + user);
+		session.getUserProperties().put("tracking",new HashSet<GameHandler>());
 		
-		if(!user.equals("broadCastList")) {
+		if(!user.equals("broadCastList") || !user.equals("broadCast")) {
 			sessions.add(session);
 			notify("{\"notify\":\"clientConnected\",\"username\":\""+user+"\"}", session, "all");
 		}
@@ -91,12 +93,28 @@ public class wsocket {
 					break;
 				case "broadCastListNeeded" :
 					session.getBasicRemote().sendText(listActiveGames().toString());
+					break;
+				case "broadCast" :
+					GameHandler g;
+					if((g = gameExists(json.getString("player1"), json.getString("player2"))) != null) {
+						System.out.println("game exists for broadcast");
+						g.broadCast(session);
+					}
 					break;				
 			}
 		}
 		else {
 			System.out.println("malpractice identified");
 		}
+	}
+
+	private GameHandler gameExists(String p1, String p2) {
+		for(GameHandler g : activeGames) {
+			if (g.getPlayer1().equals(p1) && g.getPlayer2().equals(p2)) {
+				return g;
+			}
+		}
+		return null;
 	}
 
 	private JsonObject listActiveGames() {
@@ -216,6 +234,13 @@ public class wsocket {
 			}
 		}
 		sessions.remove(session);
+		@SuppressWarnings("unchecked")
+		Set<GameHandler> gHand= (HashSet<GameHandler>)session.getUserProperties().get("tracking");
+		for(GameHandler g : gHand ) {
+			System.out.println("onclose trying to signal game " + g.getPlayer1()+" "+g.getPlayer2());
+			g.sessionEnded(session);
+		}
+		System.out.println("Onclose finished successfully");
 	}
 
 	@OnError
@@ -275,13 +300,17 @@ class GameHandler {
 
 	public void addSecondPlayer(Session second) {
 		if (p2uname.equals(second.getUserProperties().get("username"))) {
+			@SuppressWarnings("unchecked")
+			Set<GameHandler> gHand= (HashSet<GameHandler>)second.getUserProperties().get("tracking");
 			if(player2.size() == 0){
 				if (gameStarted) {
-					player2.add(second);
+					player2.add(second);					
+					gHand.add(this);
 					System.out.println("gameHandler resumes player two");
 				}
 				else {
 					player2.add(second);
+					gHand.add(this);
 					p2uname = (String)second.getUserProperties().get("username");
 					gameStarted = true;
 					System.out.println("gameHandler adds player two");
@@ -289,6 +318,7 @@ class GameHandler {
 			}
 			else {
 				player2.add(second);
+				gHand.add(this);
 				System.out.println("gameHandler adds and extra session for the second player");
 			}
 		}
@@ -296,19 +326,24 @@ class GameHandler {
 
 	public void addFirstPlayer(Session first) {
 		if (p1uname.equals(first.getUserProperties().get("username"))) {
+			@SuppressWarnings("unchecked")
+			HashSet<GameHandler> gHand= (HashSet<GameHandler>)first.getUserProperties().get("tracking");
 			if(player1.size() == 0){
 				if (gameStarted && p1uname.equals(first.getUserProperties().get("username"))) {
 					player1.add(first);
+					gHand.add(this);
 					System.out.println("gameHandler resumes player  one");
 				}
 				else {
 					player1.add(first);
+					gHand.add(this);
 					gameStarted = true;
 					System.out.println("gameHandler adds player  one\nAnd this is unusal you have to check this issue loop hole");
 				}
 			}
 			else {
 				player1.add(first);
+				gHand.add(this);
 				System.out.println("gameHandler adds and extra session for the first player");
 			}
 		}
@@ -366,6 +401,23 @@ class GameHandler {
 				sub.getBasicRemote().sendText(message.toString());	
 			}
 			
+		}
+	}
+
+	public void broadCast(Session s) {
+		broadcastList.add(s);
+		System.out.println("broadCast subscribed");
+	}
+
+	public void sessionEnded(Session s) {
+		if(player1.contains(s)) {
+			player1.remove(s);
+		}
+		else if(player2.contains(s)) {
+			player2.remove(s);
+		}
+		else if (broadcastList.contains(s)) {
+			broadcastList.remove(s);
 		}
 	}
 }
