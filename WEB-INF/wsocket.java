@@ -100,7 +100,10 @@ public class wsocket {
 						System.out.println("game exists for broadcast");
 						g.broadCast(session);
 					}
-					break;				
+					break;
+				case "endBroadCast" :
+					removeTracking(session);
+					break;					
 			}
 		}
 		else {
@@ -218,7 +221,6 @@ public class wsocket {
 		JsonArray array = object.build();
 		JsonObject json = Json.createObjectBuilder().add("notify","activeUsers").add("users",array).build();
 		return json;
-
 	}
 
 
@@ -230,17 +232,12 @@ public class wsocket {
 			return;
 		}
 		for(Session s: sessions) {
-			if(s != session) {
+			if(s.isOpen() && s != session) {
 				s.getBasicRemote().sendText("{\"notify\":\"clientDisconnected\",\"username\":\""+ session.getUserProperties().get("username")+"\"}");
 			}
 		}
 		sessions.remove(session);
-		@SuppressWarnings("unchecked")
-		Set<GameHandler> gHand= (HashSet<GameHandler>)session.getUserProperties().get("tracking");
-		for(GameHandler g : gHand ) {
-			System.out.println("onclose trying to signal game " + g.getPlayer1()+" "+g.getPlayer2());
-			g.sessionEnded(session);
-		}
+		removeTracking(session);
 		System.out.println("Onclose finished successfully");
 	}
 
@@ -248,6 +245,17 @@ public class wsocket {
 	public void onError(Throwable e) {
 		System.out.println("Error occured at wsocket " + e);
 		//e.printStackTrace();
+	}
+
+	public void removeTracking(Session s) {
+		System.out.println("endSession called");
+		@SuppressWarnings("unchecked")
+		Set<GameHandler> gHand= (HashSet<GameHandler>)s.getUserProperties().get("tracking");
+		for(GameHandler g : gHand ) {
+			System.out.println("onclose trying to signal game " + g.getPlayer1()+" "+g.getPlayer2());
+			g.sessionEnded(s);
+		}
+		System.out.println("successfully removed trackings");
 	}
 
 
@@ -414,12 +422,15 @@ class GameHandler {
 	public void sessionEnded(Session s) {
 		if(player1.contains(s)) {
 			player1.remove(s);
+			System.out.println("player1 session removed");
 		}
 		else if(player2.contains(s)) {
 			player2.remove(s);
+			System.out.println("player2 session removed");
 		}
 		else if (broadcastList.contains(s)) {
 			broadcastList.remove(s);
+			System.out.println("subscription session removed");
 		}
 	}
 }

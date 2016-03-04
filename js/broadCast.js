@@ -29,6 +29,7 @@ ws.onmessage = function(message) {
 }
 
 ws.onclose = function(message) {
+	ws.send(JSON.stringify({ notify : 'endBroadCast', username:'broadCast'}));
 	console.log("connection closed");
 };
 
