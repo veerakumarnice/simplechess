@@ -17,6 +17,9 @@ ws.onmessage = function(message) {
 	console.log("message recieved");
 	console.log(json);
 	switch (json.notify) {
+		case "gameSetUp" :
+			setUpGame(json.pieces);
+			break;
 		case "clientMoveMade" :
 				var attacker = document.getElementById(json.from);
 				var fallen = document.getElementById(json.to);
@@ -32,26 +35,6 @@ ws.onclose = function(message) {
 	ws.send(JSON.stringify({ notify : 'endBroadCast', username:'broadCast'}));
 	console.log("connection closed");
 };
-
-function createList(list) {
-	console.log("creating list");
-	var target = document.getElementById("broadCastContainer");
-	if(list.length != 0) {
-		console.log("list contains game");
-		for(var x in list) {
-			var node = document.createElement("div");
-			node.setAttribute("class", "broadCastItem");
-			node.setAttribute("player1",list[x].player1);
-			node.setAttribute("player2", list[x].player2);
-			node.setAttribute("onclick", "broadcast(this)");
-			node.appendChild(newElement("div","Player 1 : "+list[x].player1 , ""));
-			node.appendChild(newElement("div","Player 2 : "+list[x].player2 , ""));
-			node.appendChild(newElement("div","Start Time : "+list[x].startTime , ""));
-			node.appendChild(newElement("div","Active players : "+list[x].active , ""));
-			target.appendChild(node);
-		}
-	}
-}
 
 function newElement(type, inner, cls) {
 	var element = document.createElement(type);
@@ -75,4 +58,87 @@ function movePiece(attacker, fallen) {
 
 function broadcast(game) {
 	window.location.href= "broadCast?player1="+game.getAttribute("player1")+"&player2="+game.getAttribute("player2");
+}
+
+function setUpGame(pieces) {
+	addSquares();
+	for(var x in pieces) {
+		addPieceType(pieces.type, pieces.positions);
+	}
+	addPieceType();
+}
+
+
+function addSquares(src) {
+	var table = document.getElementById('chessTable');
+	var tabBody = document.createElement("tbody");
+	tabBody.setAttribute("id","chessBody");
+	for(var i=1;i<=8;i++) {
+		var tabrow = document.createElement("tr");
+		tabrow.setAttribute("class","line");
+		for(var j=1;j<=8;j++) {
+			var td = document.createElement("td");
+			td.setAttribute("xpos",j);
+			td.setAttribute("ypos",i);
+			td.setAttribute("id",""+j+i);
+			var scolor;
+			if(((i+j)%2)==0) {
+					scolor="white";
+			}
+			else {			
+					scolor="black";
+			}
+			td.setAttribute("class",scolor);
+			tabrow.appendChild(td);
+		}
+		tabBody.appendChild(tabrow);
+	}
+	table.style.border = "2px solid black";
+	table.appendChild(tabBody);	
+}
+
+
+
+
+function addPieceType(type, array) {
+	var target;
+	for(var i in array) {
+		target = document.getElementById(array[i]);
+		var img = document.createElement("img");
+		if(i%2==0) {
+			img.setAttribute("src","img/black"+capitalize(type)+".png");
+			img.setAttribute("class","piece "+type+" black");
+			img.setAttribute("player","black");
+			img.setAttribute("id","black"+type+(Math.floor(i/2)+1));
+		}
+		else {
+			img.setAttribute("src","img/white"+capitalize(type)+".png");
+			img.setAttribute("class","piece "+type+" white");
+			img.setAttribute("player","white");
+			img.setAttribute("id","whiterook"+(Math.floor(i/2)+1));
+		}
+		img.setAttribute("onmouseover","this.style.cursor='grab';");
+		img.setAttribute("piece",type);		
+		target.appendChild(img);
+	}
+}
+
+
+function capitalize(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function removeSquares() {
+	var tbody = document.getElementById('chessBody');
+	tbody.parentNode.removeChild(tbody);
+}
+
+function removeChessElements() {
+	
+}
+
+
+function pickThis(event, src) {
+	src.style.cursor = "grabbing";
+	//setInterval();
 }

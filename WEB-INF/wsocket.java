@@ -417,8 +417,9 @@ class GameHandler {
 		}
 	}
 
-	public void broadCast(Session s) {
+	public void broadCast(Session s) throws IOException{
 		broadcastList.add(s);
+		s.getBasicRemote().sendText(getPiecePositions().toString());
 		System.out.println("broadCast subscribed");
 	}
 
@@ -436,6 +437,14 @@ class GameHandler {
 			broadcastList.remove(s);
 			System.out.println("subscription session removed");
 		}
+	}
+
+	private JsonObject getPiecePositions() throws IOException {
+		JsonObjectBuilder obj = Json.createObjectBuilder();
+		obj.add("notify","gameSetUp");
+		JsonArrayBuilder array = Json.createArrayBuilder();
+		
+		return obj.add("positions", "yet to configure").build();
 	}
 }
 
