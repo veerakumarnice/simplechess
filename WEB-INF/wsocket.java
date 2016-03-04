@@ -187,7 +187,7 @@ public class wsocket {
 
 			case "all":
 				for(Session s : sessions) {
-					if(!s.equals(session)) {
+					if(s.isOpen() && !s.equals(session)) {
 						s.getBasicRemote().sendText(message);
 					}
 				}	
@@ -198,6 +198,7 @@ public class wsocket {
 				opponent.getBasicRemote().sendText(message);
 				break;			
 		}			
+		System.out.println("successfully completed notify");
 	}
 
 	private JsonObject getActiveUsers(Session session) throws IOException {
@@ -222,10 +223,10 @@ public class wsocket {
 
 
 	@OnClose
-	public void onClose(Session session) throws IOException {
-		System.out.println("Connection close");
+	public void onClose(Session session,  @PathParam("user") final String user) throws IOException {
+		System.out.println("Connection closing for "+user);
 		if(session.getUserProperties().get("username").equals("broadCastList")) {
-			System.out.println("Session broadcast closing");
+			System.out.println("Session broadcastList closing");
 			return;
 		}
 		for(Session s: sessions) {
@@ -398,6 +399,7 @@ class GameHandler {
 
 		for(Session sub : broadcastList) {
 			if(sub.isOpen()) {
+				System.out.println("broadcasting a move");
 				sub.getBasicRemote().sendText(message.toString());	
 			}
 			

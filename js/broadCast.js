@@ -28,6 +28,10 @@ ws.onmessage = function(message) {
 	}
 }
 
+ws.onclose = function(message) {
+	console.log("connection closed");
+};
+
 function createList(list) {
 	console.log("creating list");
 	var target = document.getElementById("broadCastContainer");
