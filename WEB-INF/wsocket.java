@@ -248,7 +248,7 @@ public class wsocket {
 	}
 
 	public void removeTracking(Session s) {
-		System.out.println("endSession called");
+		System.out.println("endSession called for" + s.getUserProperties().get("username"));
 		@SuppressWarnings("unchecked")
 		Set<GameHandler> gHand= (HashSet<GameHandler>)s.getUserProperties().get("tracking");
 		for(GameHandler g : gHand ) {
@@ -301,6 +301,9 @@ class GameHandler {
 		player2 = new HashSet<Session>();
 		broadcastList = new HashSet<Session>();
 		player1.add(starter);
+		@SuppressWarnings("unchecked")
+		Set<GameHandler> gHand= (HashSet<GameHandler>)starter.getUserProperties().get("tracking");
+		gHand.add(this);
 		p1uname = (String)starter.getUserProperties().get("username");
 		p2uname = opponent;
 		startTime = new Date();
@@ -420,6 +423,7 @@ class GameHandler {
 	}
 
 	public void sessionEnded(Session s) {
+		System.out.println("game handler gets notified that a session for " + s.getUserProperties().get("username")+" ended");
 		if(player1.contains(s)) {
 			player1.remove(s);
 			System.out.println("player1 session removed");
