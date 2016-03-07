@@ -363,3 +363,11 @@ a {
 	display: inline-block;
 	margin-left:100px;
 }
+
+#whitemove {
+	width:20%;
+}
+
+#blackmove {
+	width:20%;
+}

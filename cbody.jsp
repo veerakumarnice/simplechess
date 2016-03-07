@@ -9,7 +9,11 @@
 <div class="container">
 	<div class ="left" >
 		<div  id="leftboard"></div>
-		<div  id="moveboard"></div>
+		<div  id="moveboard">
+			<div id="whitemove">
+					</div>
+					<div id="blackmove"></div>
+		</div>
 	</div>
 	<div class="board"> 
 		<table id="chessTable" class="cboard">

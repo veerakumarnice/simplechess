@@ -81,9 +81,7 @@ public class wsocket {
 						inviteStatus(json.getString("username"), json.getString("opp"), "no");
 					}
 					break;
-				case "assignPlayers" :
-					assignPlayers();
-					break;
+				
 				case "clientMoveMade" :				
 					
 				//	notify(message, session, "opponent");
@@ -172,8 +170,11 @@ public class wsocket {
 	}
 
 	private boolean startGame(String myPlayer, String opp) throws IOException {
+		System.out.println("startGame");
 		setOppenent(opp);		
+		System.out.println("setOppenent done");
 		opponent.getBasicRemote().sendText(inviteToGame(myPlayer));
+		System.out.println("opponent requested");
 		return true;
 	}
 
@@ -258,29 +259,6 @@ public class wsocket {
 		System.out.println("successfully removed trackings");
 	}
 
-
-	private static String getTurn() {
-		if(turn) {
-			turn = false;
-			return "white";
-		}
-		else {
-			turn = true;
-			return "black";
-		}		
-	}
-
-	private static void assignPlayers() throws IOException{
-		Set<Session> gameSessions = getPlayerList();
-		for(Session s: gameSessions) {
-			String playerTurn = getTurn();
-			s.getUserProperties().put("player",playerTurn);
-			JsonObject json = Json.createObjectBuilder().add("notify","playerAssigned").add("player",playerTurn).build();
-			s.getBasicRemote().sendText(json.toString());
-		}
-		//assigned = true;
-	}
-
 	private static Set<Session> getPlayerList() {
 		return sessions;
 	}
@@ -295,6 +273,7 @@ class GameHandler {
 	private Set<Session> broadcastList;
 	private boolean gameStarted;
 	private Date startTime;
+	Game game;
 	public GameHandler(Session starter, String opponent) {
 		System.out.println("gameHandler initiated");
 		player1 = new HashSet<Session>();
@@ -308,6 +287,7 @@ class GameHandler {
 		p2uname = opponent;
 		startTime = new Date();
 		System.out.println("gameHandler for player one done");
+		game = new Game();
 	}
 
 	public void addSecondPlayer(Session second) {
@@ -442,33 +422,37 @@ class GameHandler {
 	private JsonObject getPiecePositions() throws IOException {
 		JsonObjectBuilder obj = Json.createObjectBuilder();
 		obj.add("notify","gameSetUp");
-		JsonArrayBuilder array = Json.createArrayBuilder();
-		
-		return obj.add("positions", "yet to configure").build();
+		//JsonArrayBuilder array = Json.createArrayBuilder();
+		System.out.println("getPiecePositions going to execute for getting string.");
+		return obj.add("pieces", game.getPositions()).build();
 	}
 }
 
 class Game {
-	HashMap<String, Integer> presentState;
-}
+	private JsonObject json;
 
-class Piece {
-	String type;
-	int position;
-	public Piece(String t, int p) {
-		type = t;
-		position = p;
+	public Game() {
+		//JsonObjectBuilder obj  = ;
+		initPos();
+		System.out.println("game created with json"+json.toString());
 	}
 
-	public boolean cuts(Piece fallen) {
-		return false;
+	public JsonObject getPositions() {
+		System.out.println("getpos in game execuetes");
+		return json;		
 	}
+	private void initPos() {
 
-	public boolean movesTo(int fallen) {
-		return false;
+		System.out.println("initial postions adding");
+		JsonObjectBuilder job = Json.createObjectBuilder().add("pawn",Json.createArrayBuilder().add(12).add(17).add(22).add(27).add(32).add(37).add(42).add(47)
+			.add(52).add(57).add(62).add(67).add(72).add(77).add(82).add(87).build());
+		job.add("knight",Json.createArrayBuilder().add(21).add(28).add(71).add(78).build());
+		job.add("bishop",Json.createArrayBuilder().add(31).add(38).add(61).add(68).build());
+		job.add("rook",Json.createArrayBuilder().add(11).add(18).add(81).add(88).build());
+		job.add("queen",Json.createArrayBuilder().add(41).add(48).build());
+		job.add("king",Json.createArrayBuilder().add(51).add(58).build());
+		json = job.build();
+		System.out.println("done adding initial positons ");//+job.build().toString());
 	}
-}
-
-class Move {
 
 }

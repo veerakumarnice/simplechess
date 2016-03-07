@@ -25,7 +25,15 @@
 		<div class="container">
 			<div class ="left" >
 				<div  id="leftboard"></div>
-				<div  id="moveboard"></div>
+				<div  id="moveboard">
+				<table>
+				<tbody>
+					<td id="whitemove">
+					</td>
+					<td id="blackmove"></td>
+				</tbody>
+				</table>
+				</div>
 			</div>
 			<div class="board"> 
 				<table id="chessTable" class="cboard">
@@ -36,5 +44,6 @@
 		<span id="test"></span>
 		
 	<script type="text/javascript" src="js/broadCast.js"></script>
+	<script type="text/javascript" src="js/chessMoves.js"></script>
 </body>
 </html>

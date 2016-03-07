@@ -43,17 +43,21 @@ function newElement(type, inner, cls) {
 	return element;
 }	
 
-function movePiece(attacker, fallen) {
-	console.log('movePiece called');
-	if(fallen.childNodes.length > 0) {
-		document.getElementById('leftboard').appendChild(fallen.childNodes[0]);
+function movePiece(attacker, target) {
+	//console.log('movePiece called');
+	//console.log(attacker);
+	//console.log(target);
+	projectMove(attacker, target);
+	if(target.childNodes.length > 0) {
+		document.getElementById('leftboard').appendChild(target.childNodes[0]);
 	}
-	fallen.appendChild(attacker);
+	target.appendChild(attacker);
 	
-	to = target.getAttribute('id');
-	if(fallen.childNodes[0].getAttribute('piece') == 'pawn' && ( to%10 == 1  || to%10 == 8  ) ){
-		promotion(pElem);
+	var to = target.getAttribute('id');
+	if(target.childNodes[0].getAttribute('piece') == 'pawn' && ( to%10 == 1  || to%10 == 8  ) ){
+		//promotion(pElem);
 	}
+
 }
 
 function broadcast(game) {
@@ -61,11 +65,14 @@ function broadcast(game) {
 }
 
 function setUpGame(pieces) {
+	console.log("setUpGame called");
+	console.log(pieces);
 	addSquares();
 	for(var x in pieces) {
-		addPieceType(pieces.type, pieces.positions);
+		console.log("pieces for "+x);
+		addPieceType(x, pieces[x]);
 	}
-	addPieceType();
+	console.log("setUpGame ended");
 }
 
 
@@ -115,12 +122,13 @@ function addPieceType(type, array) {
 			img.setAttribute("src","img/white"+capitalize(type)+".png");
 			img.setAttribute("class","piece "+type+" white");
 			img.setAttribute("player","white");
-			img.setAttribute("id","whiterook"+(Math.floor(i/2)+1));
+			img.setAttribute("id","white"+type+(Math.floor(i/2)+1));
 		}
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
 		img.setAttribute("piece",type);		
 		target.appendChild(img);
 	}
+	console.log("done adding pieces for "+type);
 }
 
 
