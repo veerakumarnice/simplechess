@@ -339,6 +339,7 @@ function moveToThis(event, src) {
 		if(validMove(src)) {
 			if(onmove) {
 				var pieceType = pElem.getAttribute("piece");
+				var startPoint = pElem.parentNode.getAttribute("id");
 				if(pieceType == 'rook' || pieceType == 'king' ) {
 					moved(pElem);	
 				}
@@ -354,7 +355,7 @@ function moveToThis(event, src) {
 				//	}
 				//}
 				if (myPlayer == chance) {
-					moveMade(pElem.getAttribute("id"), src.getAttribute("id"), promotedTo);	
+					moveMade(pElem.getAttribute("id"), startPoint, src.getAttribute("id"), promotedTo);	
 				}
 				promotedTo = null;
 				onmove = false;
@@ -379,10 +380,12 @@ function moveToThis(event, src) {
 				if(validMove(src)) {
 					console.log("castle found to be true");
 					if(!hasIntermediate(Number(pElem.parentNode.getAttribute('id')),Number(src.getAttribute('id')),'castle', null)) {
+
 						castle(pElem, src.childNodes[0]);
 						clearSelection(pElem);
+						var startPoint = pElem.parentNode.getAttribute("id");
 						if (myPlayer == chance) {
-							moveMade(pElem.getAttribute("id"), src.getAttribute("id"), promotedTo);	
+							moveMade(pElem.getAttribute("id"), startPoint, src.getAttribute("id"), promotedTo);	
 						}		
 						promotedTo = null;
 						pElem = null;
@@ -409,11 +412,11 @@ function moveToThis(event, src) {
 				if(pieceType == 'rook' || pieceType == 'king' ) {
 					moved(pElem);	
 				}
-				
+				var startPoint = pElem.parentNode.getAttribute("id");
 				cutPiece(pElem, src.childNodes[0]);
 				clearSelection(pElem);
 				if (myPlayer == chance) {
-					moveMade(pElem.getAttribute("id"), src.getAttribute("id"), promotedTo);	
+					moveMade(pElem.getAttribute("id"), startPoint, src.getAttribute("id"), promotedTo);	
 				}
 				promotedTo= null;
 				

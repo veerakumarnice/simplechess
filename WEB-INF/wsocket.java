@@ -381,22 +381,22 @@ class GameHandler {
 		else {
 			return;
 		}
-		game.clientMoveMade(message);
-
-		for(Session s : target) {
-			if(s.isOpen()) {
-				s.getBasicRemote().sendText(message.toString());	
+		if(game.clientMoveMade(message))
+		{
+			for(Session s : target) {
+				if(s.isOpen()) {
+					s.getBasicRemote().sendText(message.toString());	
+				}			
 			}
-			
-		}
 
-		for(Session sub : broadcastList) {
-			if(sub.isOpen()) {
-				System.out.println("broadcasting a move");
-				sub.getBasicRemote().sendText(message.toString());	
+			for(Session sub : broadcastList) {
+				if(sub.isOpen()) {
+					System.out.println("broadcasting a move");
+					sub.getBasicRemote().sendText(message.toString());	
+				}
+				
 			}
-			
-		}
+		}		
 	}
 
 	public void broadCast(Session s) throws IOException{
@@ -434,6 +434,7 @@ class Game {
 	private JsonObject json;
 	private JSONObject duplicate;
 	private int[][] board;
+
 
 	public Game() {
 		//JsonObjectBuilder obj  = ;
@@ -473,17 +474,94 @@ class Game {
 		}		
 	}
 
-	public void clientMoveMade(JsonObject j) {
+	public boolean clientMoveMade(JsonObject j) {
 		String attacker = j.getString("from");
 		String player = attacker.substring(0,5);
 		int pieceNum = Integer.parseInt(attacker.substring(attacker.length()-1));
 		String attackerType = attacker.substring(5, attacker.length()-1);
 		System.out.println(player + " moved piece "+attackerType+" of num " + pieceNum);
 		System.out.println("piece is in  array pos " + getArrayPos(player, pieceNum));
-
+		try {
+			if(piecePurity(Integer.parseInt(j.getString("start")), attackerType, getArrayPos(player, pieceNum)) && isValidMove(attackerType, player, pieceNum, duplicate.getJSONArray(attackerType).getInt(getArrayPos(player, pieceNum)), 
+				Integer.parseInt(j.getString("to")))) {
+				System.out.println("all satisfied ");
+				return true;
+			}	
+		}	
+		catch(JSONException e) {
+			System.out.println("JSONException occured while processing isvalid move " + e);
+		}
+		return false;
 	}
 
+	private boolean isValidMove(String attackerType, String player, int pieceNum, int src, int dest) throws JSONException {
+		System.out.println("In valid Move cheking");
+		boolean result =false;
+		String dir;
+		switch (attackerType) {
+			case "pawn" :
+				if(isPawn(src, dest)) {
+					return true;
+				}
+				break;
+			case "knight" :
+				if(isHorse(src, dest)) {
+					System.out.println("Found to be valid knight move");
+					return true;
+				}
+				break;
+			case "bishop" :
+				if(isCross(src, dest) && !hasIntermediate(src, dest, "cross")) {
+					return true;
+				}
+				break;
+			case "rook" :
+				if(isPlus(src, dest) && !hasIntermediate(src, dest, "plus")) {
+					return true;
+				}
+				break;
+			case "queen" :
+				
+				if(((dir = isQueenCross() ) != null )&& !hasIntermediate(src, dest, dir)) {
+					return true;
+				}
+				break;
+			case "king" :
+				if(isKing(src, dest)) {
+					return true;
+				}
+				break;
+		}
+
+		return result;
+	}
+
+	private boolean notMyPiece(int src, int dest) {
+		System.out.println("Checking not my piece");
+		if((board[src/10][src%10] * board[dest/10][dest%10]) > 0) {
+
+			return false;
+		}
+		return true;
+	}
+
+	private boolean piecePurity(int st, String type, int  pnum ) {
+		System.out.println("Checking purity");
+		try {
+			if(duplicate.getJSONArray(type).getInt(pnum) == st) {
+				System.out.println("purity verified");
+				return true;
+			}
+		}
+		catch(JSONException e) {
+			System.out.println("JSONException at piecePurity  "+e);
+		}
+		return false;
+	}
+
+
 	private int getArrayPos(String player, int count) {
+
 		if(player.equals("white")) {
 			return count*2 -1;
 		}
@@ -493,34 +571,34 @@ class Game {
 	private void setPiecesOnBoard() throws JSONException {
 		int len = duplicate.length();
 		JSONArray jnames = duplicate.names();
-		for(int i = 0; i < len;i++) {
-			JSONArray ja = duplicate.getJSONArray(jnames.getString(i));
-			int len2 = ja.length();
-			int value;
-			switch(jnames.getString(i)) {
-				case "pawn":
-					value = 1;
-					break;
-				case "knight":
-					value = 2;
-					break;
-				case "bishop":
-					value = 3;
-					break;
-				case "rook":
-					value = 4;
-					break;
-				case "queen":
-					value = 5;
-					break;
-				case "king" :
-					value = 6;
-					break;
-				default:
-					value = 0;
-					break;
+			for(int i = 0; i < len;i++) {
+				JSONArray ja = duplicate.getJSONArray(jnames.getString(i));
+				int len2 = ja.length();
+				int value;
+				switch(jnames.getString(i)) {
+					case "pawn":
+						value = 1;
+						break;
+					case "knight":
+						value = 2;
+						break;
+					case "bishop":
+						value = 3;
+						break;
+					case "rook":
+						value = 4;
+						break;
+					case "queen":
+						value = 5;
+						break;
+					case "king" :
+						value = 6;
+						break;
+					default:
+						value = 0;
+						break;
 
-			}
+				}
 				for(int j = 0; j < len2; j++) {
 					int pos = ja.getInt(j);
 					int sym = j%2 == 0? -1: 1;
@@ -532,7 +610,89 @@ class Game {
 					System.out.print(board[k][l]+" ");
 				}
 				System.out.println();
-		}		
+			}		
 	}
 
+	private boolean isCross(int start, int end) {
+
+		return false;
+	}
+
+	private boolean isPlus(int start, int end) {
+		if( (start/10) == (end/10)|| (start%10) == (end % 10)) {
+			return true;
+		}
+		return false;
+	}
+
+	private String isQueenCross(int start, int end) {
+		if(isCross(start, end)){
+			return "cross";
+		}
+		else if(isPlus(start, end)) {
+			return "plus";
+		}
+		return null;
+	}
+
+	private boolean isPawn(int start, int end) {
+
+		return false;
+	}
+
+	private boolean isHorse(int start, int end) {
+		System.out.println("Checking isHorse");
+		int[] horse = {-21,-19,-12,-8,8,12,19,21};
+		if( Arrays.binarySearch(horse, start-end) > -1 ) {
+			return true;
+		}
+		return false;
+	}
+
+	private void hasIntermediate(int start, int end, String type) {
+		int increment = 0;
+		if(start > end) {
+			int temp = end;
+			end = start;
+			start = temp;
+		}
+		switch(type) {
+			case "plus":
+				if((start%10 == end%10)) {
+					increment = 10;
+				}
+				else if(start/10 == end/10){
+					increment = 1;
+				}
+
+				break;
+			case "cross":
+				if((end-start)%11 ==0) {
+					increment = 11;
+				}
+				else if((end - start)%9 == 0 ) {
+					increment = 9;
+				}
+				break;
+			case "castle" :
+				increment = 10;
+				break;
+		}
+		for(start+=increment; start < end;start+=increment) {
+			if(board[start/10][start%10] != 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+	private boolean isKing(int start, int end) {
+		int[] king = {-11,-10,-9,-1,1,9,10,11};
+		if(Arrays.binarySearch(king, start - end) > -1) {
+			return true;
+		}
+		return false;
+	}
+	class intermediate {
+
+	}
 }

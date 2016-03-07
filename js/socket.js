@@ -140,8 +140,8 @@ function playerAssignment(fromServer) {
 	myPlayer = fromServer;
 }
 
-function moveMade(attacker, fallen, promote) {
-	var json = {notify:'clientMoveMade', username: username, from: attacker, to: fallen};
+function moveMade(attacker, start, fallen, promote) {
+	var json = {notify:'clientMoveMade', username: username, from: attacker, start:start, to: fallen};
 	if (promote != undefined || promote != null) {
 		json.promotion = promote;
 	}	

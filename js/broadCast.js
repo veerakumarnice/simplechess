@@ -28,6 +28,9 @@ ws.onmessage = function(message) {
 		case "broadCastAccess" :
 			
 			break;
+		case "":
+		
+			break;
 	}
 }
 
