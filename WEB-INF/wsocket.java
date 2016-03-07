@@ -12,6 +12,7 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.json.*;
 import java.util.*;
+import org.json.*;
 
 
 @ServerEndpoint(value="/wsocket/{user}")
@@ -274,7 +275,7 @@ class GameHandler {
 	private boolean gameStarted;
 	private Date startTime;
 	Game game;
-	public GameHandler(Session starter, String opponent) {
+	public GameHandler(Session starter, String opponent)  {
 		System.out.println("gameHandler initiated");
 		player1 = new HashSet<Session>();
 		player2 = new HashSet<Session>();
@@ -380,6 +381,7 @@ class GameHandler {
 		else {
 			return;
 		}
+		game.clientMoveMade(message);
 
 		for(Session s : target) {
 			if(s.isOpen()) {
@@ -430,20 +432,31 @@ class GameHandler {
 
 class Game {
 	private JsonObject json;
+	private JSONObject duplicate;
+	private int[][] board;
 
 	public Game() {
 		//JsonObjectBuilder obj  = ;
 		initPos();
-		System.out.println("game created with json"+json.toString());
+		System.out.println("game created with json "+json.toString());
+		System.out.println("game created with json duplicate "+duplicate.toString());
+		board = new int[9][9];
+		try {
+		setPiecesOnBoard();	
+		}
+		catch(JSONException e) {
+			System.out.println("JSONException on setting up pieces on board " +e);
+		}
 	}
 
 	public JsonObject getPositions() {
 		System.out.println("getpos in game execuetes");
 		return json;		
 	}
-	private void initPos() {
 
-		System.out.println("initial postions adding");
+	private void initPos() {
+		try {
+			System.out.println("initial postions adding");
 		JsonObjectBuilder job = Json.createObjectBuilder().add("pawn",Json.createArrayBuilder().add(12).add(17).add(22).add(27).add(32).add(37).add(42).add(47)
 			.add(52).add(57).add(62).add(67).add(72).add(77).add(82).add(87).build());
 		job.add("knight",Json.createArrayBuilder().add(21).add(28).add(71).add(78).build());
@@ -452,7 +465,74 @@ class Game {
 		job.add("queen",Json.createArrayBuilder().add(41).add(48).build());
 		job.add("king",Json.createArrayBuilder().add(51).add(58).build());
 		json = job.build();
-		System.out.println("done adding initial positons ");//+job.build().toString());
+		duplicate = new JSONObject(json.toString());
+		System.out.println("done adding initial positons ");
+		}
+		catch (JSONException e) {
+			System.out.println("Exception at creatng json on Game initpos"+e);
+		}		
+	}
+
+	public void clientMoveMade(JsonObject j) {
+		String attacker = j.getString("from");
+		String player = attacker.substring(0,5);
+		int pieceNum = Integer.parseInt(attacker.substring(attacker.length()-1));
+		String attackerType = attacker.substring(5, attacker.length()-1);
+		System.out.println(player + " moved piece "+attackerType+" of num " + pieceNum);
+		System.out.println("piece is in  array pos " + getArrayPos(player, pieceNum));
+
+	}
+
+	private int getArrayPos(String player, int count) {
+		if(player.equals("white")) {
+			return count*2 -1;
+		}
+		return (count - 1 )*2;
+	}
+
+	private void setPiecesOnBoard() throws JSONException {
+		int len = duplicate.length();
+		JSONArray jnames = duplicate.names();
+		for(int i = 0; i < len;i++) {
+			JSONArray ja = duplicate.getJSONArray(jnames.getString(i));
+			int len2 = ja.length();
+			int value;
+			switch(jnames.getString(i)) {
+				case "pawn":
+					value = 1;
+					break;
+				case "knight":
+					value = 2;
+					break;
+				case "bishop":
+					value = 3;
+					break;
+				case "rook":
+					value = 4;
+					break;
+				case "queen":
+					value = 5;
+					break;
+				case "king" :
+					value = 6;
+					break;
+				default:
+					value = 0;
+					break;
+
+			}
+				for(int j = 0; j < len2; j++) {
+					int pos = ja.getInt(j);
+					int sym = j%2 == 0? -1: 1;
+					board[pos/10][pos%10] = sym * value;
+				}
+			}
+			for(int k=1;k<=8;k++) {
+				for(int l=1;l<=8;l++) {
+					System.out.print(board[k][l]+" ");
+				}
+				System.out.println();
+		}		
 	}
 
 }
