@@ -104,7 +104,7 @@ public class wsocket {
 					removeTracking(session);
 					break;
 				case "clientMessage" :
-					sendMessage(session, json.getString("target"));
+					sendMessage(message, json.getString("target"));
 					break;					
 			}
 		}
@@ -533,7 +533,7 @@ class Game {
 				break;
 			case "queen" :
 				
-				if(((dir = isQueenCross() ) != null )&& !hasIntermediate(src, dest, dir)) {
+				if(((dir = isQueenCross(src, dest) ) != null )&& !hasIntermediate(src, dest, dir)) {
 					return true;
 				}
 				break;
@@ -660,7 +660,7 @@ class Game {
 		return false;
 	}
 
-	private void hasIntermediate(int start, int end, String type) {
+	private boolean hasIntermediate(int start, int end, String type) {
 		int increment = 0;
 		if(start > end) {
 			int temp = end;

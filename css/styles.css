@@ -249,7 +249,7 @@ div.container {
 	width: 250px;
 	margin:0 20px;
 	background-color: #F9FAFA;
-	 
+	
 }
 
 .chat .top {
@@ -259,6 +259,7 @@ div.container {
 	z-index: 2;
 	background-color: #00A8A8;
 	position: relative;
+
 }
 
 .chat .chatMessages {

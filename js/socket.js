@@ -61,7 +61,7 @@ ws.onmessage = function(message) {
 			var sel = document.getElementById('chatlist').childNodes;
 			console.log("disconnection recognized");
 			for (var x in sel) {
-				if(sel[x].getAttribute("value") == json.username ) {
+				if(sel[x].value == json.username ) {
 					console.log("child found");
 					sel[x].parentNode.removeChild(sel[x]);
 					return;
@@ -100,6 +100,10 @@ ws.onmessage = function(message) {
 			serverMove = false;
 			alert("Your oppenent resigned");
 			break;
+		case "clientMessage":
+			appendMessage(addChatBox(null, json.username), json.chatMessage);
+
+			break;
 	}
 };
 
@@ -117,9 +121,18 @@ function getUsers() {
 	ws.send(JSON.stringify({notify:'needActiveUsers', username:username}));
 }
 
-function sendMessage(source) {
-		ws.send(JSON.stringify({notify:'clientMessage',username:username, chatMessage:document.getElementById('textmessage').value}));
-		document.getElementById('textmessage').value = "" ;
+function sendMessage(source, event) {
+	//console.log(source.parentNode.parentNode.getAttribute("value"));
+	event = event || window.event;
+	if (event.keyCode == 13) {
+		ws.send(JSON.stringify({notify:'clientMessage',username:username, target:source.parentNode.parentNode.getAttribute("value") ,chatMessage:source.value}));
+		source.value = "" ;
+	}
+		
+}
+
+function appendMessage(box, message) {
+	alert(message);
 }
 
 function inviteRequest(opponent) {
@@ -180,14 +193,21 @@ function showUsers(usersArray) {
 	}
 }
 
-function addChatBox(opponent) {
-	console.log("add chat box");
-	var oppoUser  = opponent.getAttribute("value");
+function addChatBox(opponent, sender) {
+//	console.log("add chat box");
+	var oppoUser;
+	if(opponent !== null) {
+		oppoUser =  opponent.getAttribute("value"); 
+	}
+	else{
+	oppoUser = sender	;
+	} 
 	var existingChatBoxes = document.getElementsByClassName("chat");
 	var existingBox;
 	if (existingChatBoxes.length > 0 && (existingBox = chatBoxPresent(oppoUser, existingChatBoxes))) {
+		alert("alerady a chat bix is there");
 			highLightBox(existingBox);
-			return;
+			return existingBox;
 	}
 
 	var divElem = document.createElement("div");
@@ -221,19 +241,22 @@ function addChatBox(opponent) {
 	var textInput = document.createElement("input");
 	textInput.setAttribute("class", "chatinput");
 	textInput.setAttribute("type", "text");
+	textInput.setAttribute("onkeypress","sendMessage(this, event)");
 	textInput.setAttribute("placeholder", "Enter message");
 	innerDiv2.appendChild(textInput);
 	divElem.appendChild(innerDiv2);
 	document.getElementById("chatboxcontainer").appendChild(divElem);
+	return divElem;
 
 }
 
 function chatBoxPresent(uname, list) {
 
-	console.log(list);
-	for(var x in list) {
-		console.log(list[x]);
-		if(list[x].value == uname) {
+	//console.log('checking caht box for '+uname);
+	for(var x in list) {	
+	//	console.log('foundd ' + list[x].getAttribute("value"));
+		if(x < list.length && list[x].getAttribute("value")== uname) {
+		//	console.log('yes');
 			return list[x];
 		}
 	}
