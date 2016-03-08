@@ -252,11 +252,8 @@ function addChatBox(opponent, sender) {
 
 function chatBoxPresent(uname, list) {
 
-	//console.log('checking caht box for '+uname);
 	for(var x in list) {	
-	//	console.log('foundd ' + list[x].getAttribute("value"));
 		if(x < list.length && list[x].getAttribute("value")== uname) {
-		//	console.log('yes');
 			return list[x];
 		}
 	}
@@ -266,19 +263,10 @@ function minimizeChat(source) {
 	var target = source.parentNode.getElementsByClassName('chatMessages')[0];
 	if(target.style.display == "none") {
 		target.style.display = "block";
-		//window.getComputedStyle(target).height = '250px';
 	}
 	else {
 		target.style.display = "none";
-		//window.getComputedStyle(target).height = '0px';
 	}
-	/*if(target.style.height == "0px") {
-		console.log("height not equal to 0");
-		target.style.height = 0;
-	}
-	else {
-
-	} */
 }
 
 function closeChatBox(source) {

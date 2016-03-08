@@ -394,6 +394,7 @@ class GameHandler {
 		}
 		if(game.clientMoveMade(message))
 		{
+
 			for(Session s : target) {
 				if(s.isOpen()) {
 					s.getBasicRemote().sendText(message.toString());	
@@ -492,10 +493,15 @@ class Game {
 		String attackerType = attacker.substring(5, attacker.length()-1);
 		System.out.println(player + " moved piece "+attackerType+" of num " + pieceNum);
 		System.out.println("piece is in  array pos " + getArrayPos(player, pieceNum));
+		int start = Integer.parseInt(j.getString("start"));
+		int end = Integer.parseInt(j.getString("to"));
 		try {
-			if(piecePurity(Integer.parseInt(j.getString("start")), attackerType, getArrayPos(player, pieceNum)) && isValidMove(attackerType, player, pieceNum, duplicate.getJSONArray(attackerType).getInt(getArrayPos(player, pieceNum)), 
+			if(piecePurity(start, attackerType, getArrayPos(player, pieceNum)) && isValidMove(attackerType, player, pieceNum, duplicate.getJSONArray(attackerType).getInt(getArrayPos(player, pieceNum)), 
 				Integer.parseInt(j.getString("to")))) {
 				System.out.println("all satisfied ");
+				changePos(j, start, end, getArrayPos(player, pieceNum), attackerType);
+				printBoard("changed position");
+				printJSON("changed JSON", duplicate);
 				return true;
 			}	
 		}	
@@ -505,13 +511,32 @@ class Game {
 		return false;
 	}
 
+	private void changePos(JsonObject j, int start, int end, int arraypos, String type) {
+		System.out.println("changePos called with strart "+start+" end = "+end+" arraypos =  "+arraypos+"type = "+type);
+
+		try{
+			if(board[end/10][end%10] != 0 ) {
+
+			}
+			else {
+				board[end/10][end%10] = board[start/10][start%10];
+				board[start/10][start%10] = 0;
+				duplicate.getJSONArray(type).put(arraypos, end);				
+			}
+		}catch(JSONException e) {
+			System.out.println("JSONException at changePos " + e) ;
+		}
+	}
+
 	private boolean isValidMove(String attackerType, String player, int pieceNum, int src, int dest) throws JSONException {
 		System.out.println("In valid Move cheking");
 		boolean result =false;
 		String dir;
 		switch (attackerType) {
 			case "pawn" :
+			System.out.println("Checking is valid pawn");
 				if(isPawn(src, dest)) {
+					System.out.println("pawn move verified");
 					return true;
 				}
 				break;
@@ -523,6 +548,7 @@ class Game {
 				break;
 			case "bishop" :
 				if(isCross(src, dest) && !hasIntermediate(src, dest, "cross")) {
+					System.out.println("bishop move verified");
 					return true;
 				}
 				break;
@@ -557,8 +583,9 @@ class Game {
 	}
 
 	private boolean piecePurity(int st, String type, int  pnum ) {
-		System.out.println("Checking purity");
+		System.out.println("Checking purity start = "+st+" type = "+type+" pieceNumber = "+pnum);
 		try {
+			printJSON("at chking piecePurity", duplicate);
 			if(duplicate.getJSONArray(type).getInt(pnum) == st) {
 				System.out.println("purity verified");
 				return true;
@@ -570,7 +597,10 @@ class Game {
 		return false;
 	}
 
-
+	private void printJSON(String info, JSONObject j){
+		System.out.println(info);
+		System.out.println(j.toString());
+	}
 	private int getArrayPos(String player, int count) {
 
 		if(player.equals("white")) {
@@ -616,16 +646,38 @@ class Game {
 					board[pos/10][pos%10] = sym * value;
 				}
 			}
-			for(int k=1;k<=8;k++) {
+			printBoard("Initial Setup of the Game");		
+	}
+
+	private void printBoard(String info) {
+
+		System.out.println(info);
+		for(int k=1;k<=8;k++) {
 				for(int l=1;l<=8;l++) {
 					System.out.print(board[k][l]+" ");
 				}
 				System.out.println();
-			}		
+			}
 	}
 
 	private boolean isCross(int start, int end) {
-
+		int temp;
+		if(start > end) {
+			temp = end;
+			end = start;
+			start = temp;
+		}				
+		for(temp = start;start <= end;start += 11) {
+			if(start == end) {
+				return true;
+			}
+		}
+		
+		for(start = temp;start <= end;start += 9) {
+			if(start == end) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -647,7 +699,13 @@ class Game {
 	}
 
 	private boolean isPawn(int start, int end) {
-
+		if(board[start/10][start%10] < 0 && (end - start == 1)) {
+			return true;
+		}
+		else if(board[start/10][start%10] > 0 && (end - start == -1)) {
+			return true;
+		}
+		System.out.println("is pawn result false");
 		return false;
 	}
 
@@ -661,6 +719,9 @@ class Game {
 	}
 
 	private boolean hasIntermediate(int start, int end, String type) {
+
+		System.out.println("Checking has intermediate for "+type);
+		System.out.println("called with start = "+ start+ " end = " + end);
 		int increment = 0;
 		if(start > end) {
 			int temp = end;
@@ -689,11 +750,16 @@ class Game {
 				increment = 10;
 				break;
 		}
+
+		System.out.println("intermediate increment is "+increment);
+		printBoard("The position before calling checking the intermediate");
 		for(start+=increment; start < end;start+=increment) {
+			System.out.println("start = "+start+" end = " + end);
 			if(board[start/10][start%10] != 0) {
 				return true;
 			}
 		}
+		System.out.println("no intermediate found");
 		return false;
 	}
 	private boolean isKing(int start, int end) {
