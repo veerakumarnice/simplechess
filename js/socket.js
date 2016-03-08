@@ -153,11 +153,14 @@ function playerAssignment(fromServer) {
 	myPlayer = fromServer;
 }
 
-function moveMade(attacker, start, fallen, promote) {
+function moveMade(attacker, start, fallen, promote, castle) {
 	var json = {notify:'clientMoveMade', username: username, from: attacker, start:start, to: fallen};
 	if (promote != undefined || promote != null) {
 		json.promotion = promote;
 	}	
+	if(castle != undefined) {
+		json.castling = true;
+	}
 	ws.send(JSON.stringify(json));
 }
 

@@ -517,7 +517,38 @@ class Game {
 		int[] track = {11,18,51,58,81,88};
 		try{
 			if(board[end/10][end%10] != 0 ) {
-
+				if(j.getBoolean("castling")) {
+					if(start%10 == 1) {
+						if(end == 81) {
+							duplicate.getJSONArray("king").put(0,71);
+							duplicate.getJSONArray("rook").put(2,61);
+							board[7][1] = -6;
+							board[6][1]= -4;
+						}
+						else{
+							duplicate.getJSONArray("king").put(0,21);
+							duplicate.getJSONArray("rook").put(0,31);
+							board[2][1] = -6;
+							board[3][1]= -4;
+						}
+					}
+					else if(start%10 == 8) {
+						if(end == 88) {
+							duplicate.getJSONArray("king").put(1,78);
+							duplicate.getJSONArray("rook").put(3,68);
+							board[7][8] = 6;
+							board[6][8]= 4;
+						}
+						else{
+							duplicate.getJSONArray("king").put(1,28);
+							duplicate.getJSONArray("rook").put(1,38);
+							board[2][8] = 6;
+							board[3][8]= 4;
+						}
+					}
+					board[start/10][start%10] = 0;
+					board[end/10][end%10] = 0;
+				}
 			}
 			else {
 				board[end/10][end%10] = board[start/10][start%10];
@@ -788,7 +819,7 @@ class Game {
 	private boolean isCastling(String attackerType, String player, int pieceNum, int src, int dest) throws JSONException{
 		int[] validDest = {11,18,81,88};
 		if((src == 51 || src == 58) && (Arrays.binarySearch(validDest, dest) > -1) 
-			&& tracking.getBoolean(String.valueOf(dest)) && tracking.getBoolean(String.valueOf(dest))) {
+			&& !tracking.getBoolean(String.valueOf(dest)) && !tracking.getBoolean(String.valueOf(dest))) {
 			return true;
 		}
 		return false;	

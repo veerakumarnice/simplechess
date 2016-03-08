@@ -381,12 +381,13 @@ function moveToThis(event, src) {
 					console.log("castle found to be true");
 					if(!hasIntermediate(Number(pElem.parentNode.getAttribute('id')),Number(src.getAttribute('id')),'castle', null)) {
 
+						var startPoint = pElem.parentNode.getAttribute("id");
 						castle(pElem, src.childNodes[0]);
 						clearSelection(pElem);
-						var startPoint = pElem.parentNode.getAttribute("id");
+						
 						if (myPlayer == chance) {
-							moveMade(pElem.getAttribute("id"), startPoint, src.getAttribute("id"), promotedTo);	
-						}		
+							moveMade(pElem.getAttribute("id"), startPoint, src.getAttribute("id"), promotedTo, "castling");	
+						}
 						promotedTo = null;
 						pElem = null;
 						
