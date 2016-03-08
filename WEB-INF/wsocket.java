@@ -447,7 +447,8 @@ class Game {
 	private JSONObject duplicate;
 	private int[][] board;
 	JSONObject tracking;
-
+	int count = 0;
+	JSONObject promotedPawns;
 
 	public Game() {
 		//JsonObjectBuilder obj  = ;
@@ -492,6 +493,7 @@ class Game {
 		String player = attacker.substring(0,5);
 		int pieceNum = Integer.parseInt(attacker.substring(attacker.length()-1));
 		String attackerType = attacker.substring(5, attacker.length()-1);
+
 		System.out.println(player + " moved piece "+attackerType+" of num " + pieceNum);
 		System.out.println("piece is in  array pos " + getArrayPos(player, pieceNum));
 		int start = Integer.parseInt(j.getString("start"));
@@ -549,6 +551,18 @@ class Game {
 					board[start/10][start%10] = 0;
 					board[end/10][end%10] = 0;
 				}
+				else {
+					if(!notMyPiece(start, end)) {
+						if(j.getString("promotion") != null) {
+							promotion(j, start, end, arraypos, type);
+						}
+						else{
+							duplicate.getJSONArray(type).put(arraypos, end);
+							duplicate.getJSONArray().
+						}
+
+					}
+				}
 			}
 			else {
 				board[end/10][end%10] = board[start/10][start%10];
@@ -562,6 +576,10 @@ class Game {
 		}catch(JSONException e) {
 			System.out.println("JSONException at changePos " + e) ;
 		}
+	}
+
+	private void promotion(JsonObject j, int start, int end, int arraypos, String type) {
+
 	}
 
 	private boolean isValidMove(String attackerType, String player, int pieceNum, int src, int dest) throws JSONException {
@@ -681,7 +699,6 @@ class Game {
 					default:
 						value = 0;
 						break;
-
 				}
 				for(int j = 0; j < len2; j++) {
 					int pos = ja.getInt(j);
@@ -690,7 +707,7 @@ class Game {
 				}
 			}
 			tracking = new JSONObject("{\"11\":false, \"18\":false,\"51\":false,\"58\":false,\"81\":false,\"88\":false}");
-			
+			promotedPawns = new JSONObject();
 
 			printBoard("Initial Setup of the Game");		
 	}
@@ -751,6 +768,29 @@ class Game {
 		else if(board[start/10][start%10] > 0 && (end - start == -1)) {
 			return true;
 		}
+		else if(start%10 == 2 && end-start == 2) {
+			return true;
+		}
+		else if(start % 10 == 7 && end-start == -2) {
+			return true;
+		}
+		else if(board[start/10][start%10] > 0) {
+			if(end == start+9 && board[end/10][end%10] < 0 ) {
+				return true;
+			}
+			else if(end == start - 11 && board[end/10][end%10] < 0) {
+				return true;
+			}
+		}
+		else if(board[start/10][start%10] < 0) {
+			if(end == start+11 && board[end/10][end%10] > 0) {
+				return true;
+			}
+			else if(end == start -9 && board[end/10][end%10] > 0) {
+				return true;
+			}
+		}	
+
 		System.out.println("is pawn result false");
 		return false;
 	}
