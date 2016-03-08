@@ -181,7 +181,7 @@ function showUsers(usersArray) {
 }
 
 function addChatBox(opponent) {
-
+	console.log("add chat box");
 	var oppoUser  = opponent.getAttribute("value");
 	var existingChatBoxes = document.getElementsByClassName("chat");
 	var existingBox;
@@ -229,8 +229,11 @@ function addChatBox(opponent) {
 }
 
 function chatBoxPresent(uname, list) {
+
+	console.log(list);
 	for(var x in list) {
-		if(list[x].getAttribute("value") == uname) {
+		console.log(list[x]);
+		if(list[x].value == uname) {
 			return list[x];
 		}
 	}
@@ -240,9 +243,11 @@ function minimizeChat(source) {
 	var target = source.parentNode.getElementsByClassName('chatMessages')[0];
 	if(target.style.display == "none") {
 		target.style.display = "block";
+		//window.getComputedStyle(target).height = '250px';
 	}
 	else {
 		target.style.display = "none";
+		//window.getComputedStyle(target).height = '0px';
 	}
 	/*if(target.style.height == "0px") {
 		console.log("height not equal to 0");

@@ -242,12 +242,12 @@ div.container {
 
 
 .chat {
-	position: absolute;
+	position: relative;
 	float: right;
 	bottom: 0;
 	border: 2px solid black;
 	width: 250px;
-	
+	margin:0 20px;
 	background-color: #F9FAFA;
 	 
 }

@@ -102,11 +102,22 @@ public class wsocket {
 					break;
 				case "endBroadCast" :
 					removeTracking(session);
+					break;
+				case "clientMessage" :
+					sendMessage(session, json.getString("target"));
 					break;					
 			}
 		}
 		else {
 			System.out.println("malpractice identified");
+		}
+	}
+
+	private void sendMessage(String message, String target) throws IOException{
+		for(Session s: sessions) {
+			if(s.isOpen() && s.getUserProperties().get("username").equals(target)) {
+				s.getBasicRemote().sendText(message);
+			}
 		}
 	}
 
@@ -692,7 +703,5 @@ class Game {
 		}
 		return false;
 	}
-	class intermediate {
-
-	}
+	
 }
