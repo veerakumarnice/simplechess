@@ -168,7 +168,7 @@ function oppenentMoved(attacker, fallen, promote) {
 	serverMove = true;
 	promotedTo = promote;
 	opp.click();
-	pos.click();	
+	pos.click();
 	serverMove = false;
 }
 

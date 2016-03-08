@@ -446,6 +446,7 @@ class Game {
 	private JsonObject json;
 	private JSONObject duplicate;
 	private int[][] board;
+	JSONObject tracking;
 
 
 	public Game() {
@@ -513,7 +514,7 @@ class Game {
 
 	private void changePos(JsonObject j, int start, int end, int arraypos, String type) {
 		System.out.println("changePos called with strart "+start+" end = "+end+" arraypos =  "+arraypos+"type = "+type);
-
+		int[] track = {11,18,51,58,81,88};
 		try{
 			if(board[end/10][end%10] != 0 ) {
 
@@ -521,7 +522,11 @@ class Game {
 			else {
 				board[end/10][end%10] = board[start/10][start%10];
 				board[start/10][start%10] = 0;
+
 				duplicate.getJSONArray(type).put(arraypos, end);				
+			}
+			if(Arrays.binarySearch(track, start) > -1) {
+				tracking.put(String.valueOf(start),true);
 			}
 		}catch(JSONException e) {
 			System.out.println("JSONException at changePos " + e) ;
@@ -529,6 +534,10 @@ class Game {
 	}
 
 	private boolean isValidMove(String attackerType, String player, int pieceNum, int src, int dest) throws JSONException {
+		if(!notMyPiece(src, dest) && !attackerType.equals("king")) {
+			System.out.println("Cuting same playerr piece and thats not a king");
+			return false;
+		}
 		System.out.println("In valid Move cheking");
 		boolean result =false;
 		String dir;
@@ -565,6 +574,9 @@ class Game {
 				break;
 			case "king" :
 				if(isKing(src, dest)) {
+					return true;
+				}
+				else if(isCastling(attackerType, player, pieceNum, src, dest)) {
 					return true;
 				}
 				break;
@@ -646,6 +658,9 @@ class Game {
 					board[pos/10][pos%10] = sym * value;
 				}
 			}
+			tracking = new JSONObject("{\"11\":false, \"18\":false,\"51\":false,\"58\":false,\"81\":false,\"88\":false}");
+			
+
 			printBoard("Initial Setup of the Game");		
 	}
 
@@ -768,6 +783,15 @@ class Game {
 			return true;
 		}
 		return false;
+	}
+
+	private boolean isCastling(String attackerType, String player, int pieceNum, int src, int dest) throws JSONException{
+		int[] validDest = {11,18,81,88};
+		if((src == 51 || src == 58) && (Arrays.binarySearch(validDest, dest) > -1) 
+			&& tracking.getBoolean(String.valueOf(dest)) && tracking.getBoolean(String.valueOf(dest))) {
+			return true;
+		}
+		return false;	
 	}
 	
 }
