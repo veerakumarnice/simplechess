@@ -519,7 +519,9 @@ class Game {
 		int[] track = {11,18,51,58,81,88};
 		try{
 			if(board[end/10][end%10] != 0 ) {
-				if(j.getBoolean("castling")) {
+				System.out.println("Trget has some piece");
+				if(j.getBoolean("castling", false)) {
+
 					if(start%10 == 1) {
 						if(end == 81) {
 							duplicate.getJSONArray("king").put(0,71);
@@ -552,13 +554,23 @@ class Game {
 					board[end/10][end%10] = 0;
 				}
 				else {
-					if(!notMyPiece(start, end)) {
-						if(j.getString("promotion") != null) {
-							promotion(j, start, end, arraypos, type);
+					System.out.println("target has piece othere than castling");
+					if(board[start/10][start%10] * board[end/10][end%10] < 0) {
+						System.out.println("target piece is found to have oppoenent piece");
+						System.out.println("cutting moves");
+						try{
+							cutted(end);
+							System.out.println("cutted finished");
 						}
-						else{
-							duplicate.getJSONArray(type).put(arraypos, end);
-							duplicate.getJSONArray().
+						catch(JSONException e) {
+							System.out.println("JSONException occured at maing  cut piece " + e);
+						}
+						duplicate.getJSONArray(type).put(arraypos, end);
+						board[end/10][end%10] = board[start/10][start%10];
+						board[start/10][start%10] = 0;
+						if(j.getString("promotion", "") != "") {
+							System.out.println("promotion is eligibles");
+							promotion(j, start, end, arraypos, type);
 						}
 
 					}
@@ -575,6 +587,24 @@ class Game {
 			}
 		}catch(JSONException e) {
 			System.out.println("JSONException at changePos " + e) ;
+		}
+	}
+
+	private void cutted(int pos) throws JSONException{
+		System.out.println("cuuted called for "+ pos);
+		JSONArray array = duplicate.names();
+		int len = duplicate.length();
+		for(int i =0; i <len;i++){
+			String type = array.getString(i);
+			JSONArray ja = duplicate.getJSONArray(type);
+			int len2 = ja.length();
+			for(int j = 0 ; j < len2 ; j++) {
+				if(ja.getInt(j) == pos) {
+					ja.put(j, 100+count);
+					count++;
+					return;
+				}				
+			}			
 		}
 	}
 
