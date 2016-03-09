@@ -24,12 +24,19 @@ ws.onmessage = function(message) {
 		case "clientMoveMade" :
 				var attacker = document.getElementById(json.from);
 				var fallen = document.getElementById(json.to);
-				movePiece(attacker, fallen);
+				movePiece(attacker, fallen, json);
+
 				break;
 		case "broadCastAccess" :
 			
 			break;
+		case "previousMoves":
+		//	console.log(json.toString());
+		//	console.log(json.previous);
+			displayMoves(json.previous);
+			break;
 		case "encodedMove":
+
 			projectMove(json.player, json.move)
 			break;
 	}
@@ -47,20 +54,40 @@ function newElement(type, inner, cls) {
 	return element;
 }	
 
-function movePiece(attacker, target) {
+function movePiece(attacker, target, jsondata) {
 	//console.log('movePiece called');
 	//console.log(attacker);
 	//console.log(target);
 	//projectMove(attacker, target);
+	if(jsondata.castling) {
+	var end = fallen.parentNode.getAttribute('id');
+	var start = attacker.parentNode.getAttribute('id');
+	if(end == 81 || end == 88) {
+		document.getElementById(end-10).appendChild(attacker);
+		document.getElementById(end-20).appendChild(fallen);
+	}
+	else if( end == 11 || end == 18)  {
+		document.getElementById(start-30).appendChild(attacker);
+		document.getElementById(start-20).appendChild(fallen);
+	}
+	return;
+	}
+
+
 	if(target.childNodes.length > 0) {
 		document.getElementById('leftboard').appendChild(target.childNodes[0]);
 	}
 	target.appendChild(attacker);
 	
 	var to = target.getAttribute('id');
-	if(target.childNodes[0].getAttribute('piece') == 'pawn' && ( to%10 == 1  || to%10 == 8  ) ){
-		//promotion(pElem);
+	console.log(jsondata.promotion);
+	if(jsondata.promotion !== undefined) {
+		console.log("promtion capable");
+		attacker.setAttribute("src",attacker.getAttribute("src").substring(0,9)+capitalize(jsondata.promotion)+".png");
 	}
+	//if(target.childNodes[0].getAttribute('piece') == 'pawn' && ( to%10 == 1  || to%10 == 8  ) ){
+		//promotion(pElem);
+	//}
 
 }
 
@@ -75,16 +102,16 @@ function setUpGame(pieces) {
 	var cutpieces = [];
 	for(var x in pieces) {
 		if(x != "promoted") {
-		console.log("pieces for "+x);
+		//console.log("pieces for "+x);
 			addPieceType(x, pieces[x], pieces["promoted"], cutpieces);
 		}
 
 	}
 	var leftboard= document.getElementById("leftboard");
 	for(var y in cutpieces) {
-		console.log(y);
+		//console.log(y);
 		//if(y < leftboard.length) {
-			console.log(cutpieces[y]);
+		//	console.log(cutpieces[y]);
 			leftboard.appendChild(cutpieces[y]);	
 		//}
 		
@@ -141,22 +168,32 @@ function addPieceType(type, array, promotedPieces, cutpieces) {
 			img.setAttribute("id","white"+type+(Math.floor(i/2)+1));
 		}
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
-		img.setAttribute("piece",type);
+		if(type == "pawn" && (promotedPieces[i] != "none")) {
+			img.setAttribute("piece",promotedPieces[i]);
+			if(img.getAttribute("player") == "white") {
+				img.setAttribute("src","img/whiteQueen.png");
+			}
+			else {
+				img.setAttribute("src","img/blackQueen.png");
+			}
+		}
+		else {
+			img.setAttribute("piece",type);
+		}
 		if(array[i] > 10 && array[i] < 89) {
 			document.getElementById(array[i]).appendChild(img);
 			//target.appendChild(img);
 		}
 		else if(array[i] >=100) {
 			cutpieces[array[i]%100]= img;
-			console.log("setting it up at "+ array[i]%100 + " for "+array[i]);
-			console.log("cuuted piecec is ");
-			console.log(img);
-			console.log(cutpieces);
-
+		//	console.log("setting it up at "+ array[i]%100 + " for "+array[i]);
+		//	console.log("cuuted piecec is ");
+		//	console.log(img);
+		//	console.log(cutpieces);
 		}
 		
 	}
-	console.log("done adding pieces for "+type);
+	//console.log("done adding pieces for "+type);
 }
 
 

@@ -4,3 +4,9 @@ function projectMove(ptype, chessmove) {
 	sp.innerHTML = chessmove;
 	board.appendChild(sp);
 }
+
+function displayMoves(moves) {
+	for(var x in moves) {
+		projectMove(moves[x].player, moves[x].move);
+	}
+}
