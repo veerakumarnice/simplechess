@@ -19,7 +19,6 @@
 		<table id="chessTable" class="cboard">
 	
 		</table>
-
 	</div>
 	<div class = "right">
 	<h3>Event Board</h3>

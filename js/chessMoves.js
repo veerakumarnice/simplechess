@@ -7,12 +7,12 @@ function projectMove(attacker, target) {
 }
 
 function getLetter(attacker, target) {
-	var let = attacker.getAttribute("piece").charAt(0).toUpperCase();
+	var let = attacker.getAttribute("piece");
 	var letter = "";
 	if(let != 'p') {
 		letter = let;
 	}
-	return letter;
+	return let.toUpperCase();
 }
 
 function encodePos(input) {

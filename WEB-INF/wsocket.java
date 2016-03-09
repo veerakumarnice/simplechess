@@ -19,7 +19,7 @@ import org.json.*;
 public class wsocket {
 
 	private static Set<GameHandler> activeGames = Collections.synchronizedSet(new HashSet<GameHandler>()); 
-	private static boolean turn = true;
+	//private static boolean turn = true;
 
 	//private static boolean assigned = false;
 	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
@@ -318,6 +318,7 @@ class GameHandler {
 					p2uname = (String)second.getUserProperties().get("username");
 					gameStarted = true;
 					System.out.println("gameHandler adds player two");
+					game.setGameState("state","started");
 				}
 			}
 			else {
@@ -457,9 +458,9 @@ class Game {
 	private JsonObject json;
 	private JSONObject duplicate;
 	private int[][] board;
-	JSONObject tracking;
-	int count = 0;
-	JSONObject promotedPawns;
+	private JSONObject tracking;
+	private int count = 0;
+	private JSONObject gameStatus;
 
 	public Game() {
 		//JsonObjectBuilder obj  = ;
@@ -513,6 +514,7 @@ class Game {
 		String player = attacker.substring(0,5);
 		int pieceNum = Integer.parseInt(attacker.substring(attacker.length()-1));
 		String attackerType = attacker.substring(5, attacker.length()-1);
+		int arraypos = getArrayPos(player, pieceNum);
 		String ptype;
 		try {
 		if(attackerType.equals("pawn") && !(ptype = duplicate.getJSONArray("promoted").getString(getArrayPos(player, pieceNum))).equals("none")) {
@@ -527,6 +529,8 @@ class Game {
 			if(piecePurity(start, attackerType, getArrayPos(player, pieceNum)) && isValidMove(attackerType, player, pieceNum, duplicate.getJSONArray(attackerType).getInt(getArrayPos(player, pieceNum)), 
 				Integer.parseInt(j.getString("to")))) {
 				System.out.println("all satisfied ");
+				String encoded = encodeMove(j, start, end, arraypos, attackerType);
+				System.out.println("encode = "+encoded);
 				changePos(j, start, end, getArrayPos(player, pieceNum), attackerType);
 				printBoard("changed position");
 				printJSON("changed JSON", duplicate);
@@ -537,6 +541,66 @@ class Game {
 			System.out.println("JSONException occured while processing isvalid move " + e);
 		}
 		return false;
+	}
+
+	private String encodeMove(JsonObject j, int start, int end, int arraypos, String type) {
+		System.out.println("Encoding move for start = "+start+" end = "+end);
+		if(type.equals("king")) {
+			if(end == 81 || end == 88 ) {
+				return "0-0";
+			}
+			else if(end == 11 || end == 18) {
+				return "0-0-0";
+			}
+			
+		}
+		String encoded = whichPiece(j, start, end, type);
+		encoded += algebraic(end);
+		encoded += encodeSpecial(j, start, end, type);
+		return encoded;
+	}
+
+	private String whichPiece(JsonObject j, int start, int end, String type) {
+		System.out.println("which piecec for "+ start);
+		String letter = "";
+		switch(type) {
+			case "pawn":
+				break;
+			case "knight":
+				letter += "N";
+				break;
+			case "rook":
+				letter += "R";
+				break;
+			case "bishop" :
+				letter	+= "B";
+				break;
+			case "king" :
+				letter	+= "K";
+				break;
+			case "queen" :
+				letter += "Q";
+				break;
+		}
+		if(hasSamePieceMove(j, start, end, type)) {
+			letter += algebraic(start);
+		}
+		return letter;
+	}
+
+	private boolean hasSamePieceMove(JsonObject j, int start, int end, String type) {
+		System.out.println("Checking hasSamePieceMove");
+
+		return false;
+	}
+
+	private String algebraic(int end) {
+		char[] chararray = {'a','b','c','d','e','f','g','h'};
+		return chararray[(end/10) -1] +""+ (9 - (end%10));
+	}
+
+	private String encodeSpecial(JsonObject j, int start, int end, String type) {
+		return "";
 	}
 
 	private void changePos(JsonObject j, int start, int end, int arraypos, String type) {
@@ -597,7 +661,6 @@ class Game {
 							System.out.println("promotion is eligibles");
 							promotion(j, start, end, arraypos, type);
 						}
-
 					}
 				}
 			}
@@ -630,6 +693,9 @@ class Game {
 				if(ja.getInt(j) == pos) {
 					ja.put(j, 100+count);
 					count++;
+					if(type.equals("king")) {
+
+					}
 					return;
 				}				
 			}			
@@ -769,7 +835,10 @@ class Game {
 				}
 			}
 			tracking = new JSONObject("{\"11\":false, \"18\":false,\"51\":false,\"58\":false,\"81\":false,\"88\":false}");
-
+			gameStatus = new JSONObject();
+			gameStatus.accumulate("state","requested");
+			gameStatus.accumulate("resigned","none");
+			gameStatus.accumulate("won","none");
 			printBoard("Initial Setup of the Game");		
 	}
 
@@ -915,6 +984,15 @@ class Game {
 			return true;
 		}
 		return false;
+	}
+
+	public void setGameState(String property, String value) {
+		try {
+			gameStatus.putOpt(property, value);
+		}
+		catch(JSONException e) {
+			System.out.println("JSONException at setting gameProperty "+ e);
+		}
 	}
 
 	private boolean isCastling(String attackerType, String player, int pieceNum, int src, int dest) throws JSONException{
