@@ -19,6 +19,7 @@ ws.onmessage = function(message) {
 	switch (json.notify) {
 		case "gameSetUp" :
 			setUpGame(json.pieces);
+
 			break;
 		case "clientMoveMade" :
 				var attacker = document.getElementById(json.from);
@@ -71,12 +72,22 @@ function setUpGame(pieces) {
 	console.log("setUpGame called");
 	console.log(pieces);
 	addSquares();
+	var cutpieces = [];
 	for(var x in pieces) {
 		if(x != "promoted") {
 		console.log("pieces for "+x);
-			addPieceType(x, pieces[x], pieces["promoted"]);
+			addPieceType(x, pieces[x], pieces["promoted"], cutpieces);
 		}
 
+	}
+	var leftboard= document.getElementById("leftboard");
+	for(var y in cutpieces) {
+		console.log(y);
+		//if(y < leftboard.length) {
+			console.log(cutpieces[y]);
+			leftboard.appendChild(cutpieces[y]);	
+		//}
+		
 	}
 	console.log("setUpGame ended");
 }
@@ -113,10 +124,9 @@ function addSquares(src) {
 
 
 
-function addPieceType(type, array, promotedPieces) {
-	var target;
-	for(var i in array) {
-		target = document.getElementById(array[i]);
+function addPieceType(type, array, promotedPieces, cutpieces) {
+	
+	for(var i in array) {		
 		var img = document.createElement("img");
 		if(i%2==0) {
 			img.setAttribute("src","img/black"+capitalize(type)+".png");
@@ -131,8 +141,20 @@ function addPieceType(type, array, promotedPieces) {
 			img.setAttribute("id","white"+type+(Math.floor(i/2)+1));
 		}
 		img.setAttribute("onmouseover","this.style.cursor='grab';");
-		img.setAttribute("piece",type);		
-		target.appendChild(img);
+		img.setAttribute("piece",type);
+		if(array[i] > 10 && array[i] < 89) {
+			document.getElementById(array[i]).appendChild(img);
+			//target.appendChild(img);
+		}
+		else if(array[i] >=100) {
+			cutpieces[array[i]%100]= img;
+			console.log("setting it up at "+ array[i]%100 + " for "+array[i]);
+			console.log("cuuted piecec is ");
+			console.log(img);
+			console.log(cutpieces);
+
+		}
+		
 	}
 	console.log("done adding pieces for "+type);
 }

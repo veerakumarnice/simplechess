@@ -621,6 +621,9 @@ class Game {
 		int len = duplicate.length();
 		for(int i =0; i <len;i++){
 			String type = array.getString(i);
+			if(type.equals("promoted")) {
+				continue;
+			}
 			JSONArray ja = duplicate.getJSONArray(type);
 			int len2 = ja.length();
 			for(int j = 0 ; j < len2 ; j++) {
