@@ -29,8 +29,8 @@ ws.onmessage = function(message) {
 		case "broadCastAccess" :
 			
 			break;
-		case "":
-		
+		case "encodedMove":
+			projectMove(json.player, json.move)
 			break;
 	}
 }
@@ -51,7 +51,7 @@ function movePiece(attacker, target) {
 	//console.log('movePiece called');
 	//console.log(attacker);
 	//console.log(target);
-	projectMove(attacker, target);
+	//projectMove(attacker, target);
 	if(target.childNodes.length > 0) {
 		document.getElementById('leftboard').appendChild(target.childNodes[0]);
 	}

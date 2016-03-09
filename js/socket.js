@@ -50,6 +50,10 @@ ws.onmessage = function(message) {
 				console.log("rejected invitation");
 			}
 			break;
+		case "encodedMove":
+			projectMove(json.player, json.move)
+			break;
+
 		case "initiateGame" :
 			myPlayer = json.player;
 			document.getElementById('myP').innerHTML= "  You :" +myPlayer;
@@ -82,6 +86,9 @@ ws.onmessage = function(message) {
 					}
 				}
 			}
+			if(json.username == "broadCast" || json.username == "broadCastList") {
+				return;
+			}	
 			
 			if(!found) {
 				var el = document.createElement("div");

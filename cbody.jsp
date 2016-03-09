@@ -8,13 +8,17 @@
 </table>
 <div class="container">
 	<div class ="left" >
-		<div  id="leftboard"></div>
-		<div  id="moveboard">
-			<div id="whitemove">
-					</div>
-					<div id="blackmove"></div>
-		</div>
-	</div>
+				<div  id="leftboard"></div>
+				<div  id="moveboard">
+				<table>
+				<tbody>
+					<td id="whitemove">
+					</td>
+					<td id="blackmove"></td>
+				</tbody>
+				</table>
+				</div>
+			</div>
 	<div class="board"> 
 		<table id="chessTable" class="cboard">
 	
@@ -43,6 +47,7 @@
 	
 </div>
 <script src="js/chessScript.js" type="text/javascript"></script>
+<script src="js/chessMoves.js" type="text/javascript"></script>
 <script type="text/javascript">
 	window.onbeforeunload = function(event)
     {

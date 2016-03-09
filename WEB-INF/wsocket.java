@@ -299,7 +299,7 @@ class GameHandler {
 		p2uname = opponent;
 		startTime = new Date();
 		System.out.println("gameHandler for player one done");
-		game = new Game();
+		game = new Game(this);
 	}
 
 	public void addSecondPlayer(Session second) {
@@ -412,6 +412,25 @@ class GameHandler {
 		}		
 	}
 
+	public void notifyEncodedMove(JsonObject j) throws IOException{
+		//System.out.println("notifying from username = "+ username+" message = "+message.toString());
+		for(Session s : player1) {
+			if(s.isOpen()) {
+				s.getBasicRemote().sendText(j.toString());
+			}
+		}
+		for(Session s : player2) {
+			if(s.isOpen()) {
+				s.getBasicRemote().sendText(j.toString());
+			}
+		}
+		for(Session s : broadcastList) {
+			if(s.isOpen()) {
+				s.getBasicRemote().sendText(j.toString());
+			}
+		}
+	}
+
 	public void broadCast(Session s) throws IOException{
 		broadcastList.add(s);
 		s.getBasicRemote().sendText(getPiecePositions().toString());
@@ -461,10 +480,11 @@ class Game {
 	private JSONObject tracking;
 	private int count = 0;
 	private JSONObject gameStatus;
-
-	public Game() {
+	private GameHandler gH;
+	public Game(GameHandler g) {
 		//JsonObjectBuilder obj  = ;
 		initPos();
+		gH = g;
 		System.out.println("game created with json "+json.toString());
 		System.out.println("game created with json duplicate "+duplicate.toString());
 		board = new int[9][9];
@@ -509,7 +529,7 @@ class Game {
 		}		
 	}
 
-	public boolean clientMoveMade(JsonObject j) {
+	public boolean clientMoveMade(JsonObject j) throws IOException {
 		String attacker = j.getString("from");
 		String player = attacker.substring(0,5);
 		int pieceNum = Integer.parseInt(attacker.substring(attacker.length()-1));
@@ -531,6 +551,7 @@ class Game {
 				System.out.println("all satisfied ");
 				String encoded = encodeMove(j, start, end, arraypos, attackerType);
 				System.out.println("encode = "+encoded);
+				gH.notifyEncodedMove(Json.createObjectBuilder().add("notify","encodedMove").add("player",player).add("move",encoded).build());
 				changePos(j, start, end, getArrayPos(player, pieceNum), attackerType);
 				printBoard("changed position");
 				printJSON("changed JSON", duplicate);
@@ -555,13 +576,29 @@ class Game {
 			
 		}
 		String encoded = whichPiece(j, start, end, type);
+		if((boardValue(end) * boardValue(start) )< 0) {
+			encoded += "x";
+		}
 		encoded += algebraic(end);
 		encoded += encodeSpecial(j, start, end, type);
 		return encoded;
 	}
 
+	private int boardValue(int pos) {
+		return board[pos/10][pos%10];
+	}
+
 	private String whichPiece(JsonObject j, int start, int end, String type) {
 		System.out.println("which piecec for "+ start);
+		String letter = "";
+		letter += encodePiece(type);
+		if(hasSamePieceMove(j, start, end, type)) {
+			letter += algebraic(start);
+		}
+		return letter;
+	}
+
+	private String encodePiece(String type) {
 		String letter = "";
 		switch(type) {
 			case "pawn":
@@ -582,10 +619,8 @@ class Game {
 				letter += "Q";
 				break;
 		}
-		if(hasSamePieceMove(j, start, end, type)) {
-			letter += algebraic(start);
-		}
 		return letter;
+
 	}
 
 	private boolean hasSamePieceMove(JsonObject j, int start, int end, String type) {
@@ -600,6 +635,10 @@ class Game {
 	}
 
 	private String encodeSpecial(JsonObject j, int start, int end, String type) {
+		String special;
+		if((special = j.getString("promotion", null)) != null) {
+			return "="+encodePiece(special);
+		}
 		return "";
 	}
 
