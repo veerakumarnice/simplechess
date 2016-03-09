@@ -433,12 +433,23 @@ class GameHandler {
 		}
 	}
 
-	private JsonObject getPiecePositions() throws IOException {
-		JsonObjectBuilder obj = Json.createObjectBuilder();
-		obj.add("notify","gameSetUp");
+	private JSONObject getPiecePositions() throws IOException {
+//		JsonObjectBuilder obj = Json.createObjectBuilder();
+
+		JSONObject obj = new JSONObject();
+		try {
+		
+		obj.accumulate("notify", "gameSetUp");
+//		obj.add("notify","gameSetUp");
 		//JsonArrayBuilder array = Json.createArrayBuilder();
 		System.out.println("getPiecePositions going to execute for getting string.");
-		return obj.add("pieces", game.getPositions()).build();
+//		return obj.add("pieces", game.getPositions()).build();
+		obj.accumulate("pieces", game.getPositions());
+		}
+		catch(JSONException e) {
+			System.out.println("JSONException at getPiecePositions" + e);
+		}
+		return obj;
 	}
 }
 
@@ -464,9 +475,9 @@ class Game {
 		}
 	}
 
-	public JsonObject getPositions() {
+	public JSONObject getPositions() {
 		System.out.println("getpos in game execuetes");
-		return json;		
+		return duplicate;		
 	}
 
 	private void initPos() {
@@ -479,9 +490,18 @@ class Game {
 		job.add("rook",Json.createArrayBuilder().add(11).add(18).add(81).add(88).build());
 		job.add("queen",Json.createArrayBuilder().add(41).add(48).build());
 		job.add("king",Json.createArrayBuilder().add(51).add(58).build());
+		
+		JsonArrayBuilder  ab = Json.createArrayBuilder(); 
+		for(int i =0;i<16;i++) {
+			ab.add("none");
+		}
+		job.add("promoted",ab.build());
+
 		json = job.build();
+		
+
 		duplicate = new JSONObject(json.toString());
-		System.out.println("done adding initial positons ");
+		System.out.println("done adding initial positons ");	
 		}
 		catch (JSONException e) {
 			System.out.println("Exception at creatng json on Game initpos"+e);
@@ -493,12 +513,17 @@ class Game {
 		String player = attacker.substring(0,5);
 		int pieceNum = Integer.parseInt(attacker.substring(attacker.length()-1));
 		String attackerType = attacker.substring(5, attacker.length()-1);
+		String ptype;
+		try {
+		if(attackerType.equals("pawn") && !(ptype = duplicate.getJSONArray("promoted").getString(getArrayPos(player, pieceNum))).equals("none")) {
+			attackerType = ptype;
+		}
 
 		System.out.println(player + " moved piece "+attackerType+" of num " + pieceNum);
 		System.out.println("piece is in  array pos " + getArrayPos(player, pieceNum));
 		int start = Integer.parseInt(j.getString("start"));
 		int end = Integer.parseInt(j.getString("to"));
-		try {
+		
 			if(piecePurity(start, attackerType, getArrayPos(player, pieceNum)) && isValidMove(attackerType, player, pieceNum, duplicate.getJSONArray(attackerType).getInt(getArrayPos(player, pieceNum)), 
 				Integer.parseInt(j.getString("to")))) {
 				System.out.println("all satisfied ");
@@ -591,7 +616,7 @@ class Game {
 	}
 
 	private void cutted(int pos) throws JSONException{
-		System.out.println("cuuted called for "+ pos);
+		System.out.println("cutted called for "+ pos);
 		JSONArray array = duplicate.names();
 		int len = duplicate.length();
 		for(int i =0; i <len;i++){
@@ -704,7 +729,11 @@ class Game {
 		int len = duplicate.length();
 		JSONArray jnames = duplicate.names();
 			for(int i = 0; i < len;i++) {
-				JSONArray ja = duplicate.getJSONArray(jnames.getString(i));
+				String name = jnames.getString(i);
+				if(name.equals("promoted")) {
+					continue;
+				}
+				JSONArray ja = duplicate.getJSONArray(name);
 				int len2 = ja.length();
 				int value;
 				switch(jnames.getString(i)) {
@@ -737,7 +766,6 @@ class Game {
 				}
 			}
 			tracking = new JSONObject("{\"11\":false, \"18\":false,\"51\":false,\"58\":false,\"81\":false,\"88\":false}");
-			promotedPawns = new JSONObject();
 
 			printBoard("Initial Setup of the Game");		
 	}

@@ -72,8 +72,11 @@ function setUpGame(pieces) {
 	console.log(pieces);
 	addSquares();
 	for(var x in pieces) {
+		if(x != "promoted") {
 		console.log("pieces for "+x);
-		addPieceType(x, pieces[x]);
+			addPieceType(x, pieces[x], pieces["promoted"]);
+		}
+
 	}
 	console.log("setUpGame ended");
 }
@@ -110,7 +113,7 @@ function addSquares(src) {
 
 
 
-function addPieceType(type, array) {
+function addPieceType(type, array, promotedPieces) {
 	var target;
 	for(var i in array) {
 		target = document.getElementById(array[i]);

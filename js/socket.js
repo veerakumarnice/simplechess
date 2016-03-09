@@ -76,7 +76,7 @@ ws.onmessage = function(message) {
 			var found = false;
 			if(chatChilds.length != 0) {
 				for(var x in chatChilds) {
-					if (chatChilds[x].getAttribute("value") == json.username) {
+					if (x < chatChilds.length && chatChilds[x].getAttribute("value") == json.username) {
 						found = true;
 						break;
 					}
@@ -185,7 +185,7 @@ function showUsers(usersArray) {
 		list.removeChild(list.firstChild);
 	}
 	for(var u in usersArray ) {
-		if(usersArray[u] != username) {
+		if(usersArray[u] != username && usersArray[u] != "broadCastList" && usersArray[u] != "broadCast") {
 			var node = document.createElement("div");
 			node.setAttribute("value", usersArray[u]);
 			node.setAttribute("class","chatMember");
