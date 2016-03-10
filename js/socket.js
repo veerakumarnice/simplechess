@@ -22,8 +22,12 @@ ws.onmessage = function(message) {
 	console.log("message recieved");
 	console.log(json);
 	switch(json.notify) {
+		case "gameSetUp":
+			setUpGame(json.pieces);
+			break;
 		case "clientMoveMade" :
 			oppenentMoved(json.from, json.to, json.promotion);
+			console.log("The time move made was "+new Date(json.time));
 			break;
 		case "activeUsers" :
 			showUsers(json.users);
@@ -110,6 +114,12 @@ ws.onmessage = function(message) {
 		case "clientMessage":
 			appendMessage(addChatBox(null, json.username), json.chatMessage);
 
+			break;
+		case "displayMessage":
+			alert(json.message);
+			break;
+		case "previousMoves":
+			displayMoves(json.previous);
 			break;
 	}
 };

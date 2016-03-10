@@ -34,7 +34,7 @@ public class wsocket {
 		System.out.println("username set to " + user);
 		session.getUserProperties().put("tracking",new HashSet<GameHandler>());
 		
-		if(!user.equals("broadCastList") || !user.equals("broadCast")) {
+		if(!user.equals("broadCastList") && !user.equals("broadCast")) {
 			sessions.add(session);
 			notify("{\"notify\":\"clientConnected\",\"username\":\""+user+"\"}", session, "all");
 		}
@@ -43,11 +43,17 @@ public class wsocket {
 	}
 	
 	@OnMessage
-	public void onMessage(String message, final Session session, @PathParam("user") final String user) throws IOException{
+	public void onMessage(String message, final Session session, @PathParam("user") final String user) throws IOException, JSONException{
 		System.out.println("Received from client :" + message);
-		JsonReader jreader = Json.createReader(new StringReader(message));
+		JSONObject jsonObject = new JSONObject(message);
+		jsonObject.accumulate("time",new Date().getTime());
+		System.out.println("The timeStamp for message becomes "+new Date().getTime());
+
+		JsonReader jreader = Json.createReader(new StringReader(jsonObject.toString()));
 		JsonObject json =  jreader.readObject();
 		jreader.close();
+
+
 		if(json.getString("username").equals(user)) {
 				System.out.println("username satisfied");
 			switch (json.getString("notify")) {
@@ -105,7 +111,10 @@ public class wsocket {
 					break;
 				case "clientMessage" :
 					sendMessage(message, json.getString("target"));
-					break;					
+					break;	
+				case "resumeMe"	:
+					gameHandler.resumeGamePlay(session);
+					break;				
 			}
 		}
 		else {
@@ -345,7 +354,7 @@ class GameHandler {
 					player1.add(first);
 					gHand.add(this);
 					gameStarted = true;
-					System.out.println("gameHandler adds player  one\nAnd this is unusal you have to check this issue loop hole");
+					System.out.println("gameHandler adds player one\nAnd this is unusal you have to check this issue loop hole");
 				}
 			}
 			else {
@@ -384,7 +393,7 @@ class GameHandler {
 		return null;
 	}
 
-	public void notify(String username, JsonObject message) throws IOException {
+	public void notify(String username, JsonObject message) throws IOException,JSONException {
 		Set<Session> target;
 		if(username.equals(p1uname)) {
 			target = player2;
@@ -404,6 +413,12 @@ class GameHandler {
 				winner = p1uname;
 			}
 			game.gameResignWinner(winner ,message.getString("username"));
+			//gameEnded();
+			return;
+		}
+		if(!isIntegrityTrue(username, new JSONObject(message.toString()))) {
+			resumeGamePlay(username);
+			return;
 		}
 		if(game.clientMoveMade(message))
 		{
@@ -423,6 +438,33 @@ class GameHandler {
 			}
 		}		
 	}
+
+	private boolean isIntegrityTrue(String user, JSONObject j) throws JSONException {
+		System.out.println("integrity checking ");
+		Date recievedTime = new Date(j.getLong("time"));
+		Date lastTime = game.getLastMoveTime();
+		if(lastTime == null) {
+			lastTime = startTime;
+			System.out.println("retun was a null from the game");
+		}
+		System.out.println("rcvd = "+recievedTime.toString() + " last = "+lastTime.toString());
+		if(recievedTime.after(lastTime)) {
+			System.out.println("recieved time is a valid timestamp");
+			return true;
+		}
+		System.out.println("Time is invalid timestamp");
+		return false;
+	}
+
+	public void resumeGamePlay(Session s) throws IOException{		
+		 s.getBasicRemote().sendText(getPiecePositions().toString());
+		 s.getBasicRemote().sendText(game.getPastMoves().toString());
+	}
+
+	private void resumeGamePlay(String user) throws IOException{
+
+	}
+
 
 	public void notifyEncodedMove(JSONObject j) throws IOException{
 		//System.out.println("notifying from username = "+ username+" message = "+message.toString());
@@ -511,6 +553,14 @@ class Game {
 		}
 	}
 
+	public Date getLastMoveTime() throws JSONException  {
+		if(recordedMoves.length() == 0) {
+			return null;
+		}		
+		return new Date(recordedMoves.getJSONObject(recordedMoves.length() -1).getJSONObject("fromClient").getInt("time"));
+
+	}
+
 	public JSONObject getPositions() {
 		System.out.println("getpos in game execuetes");
 		return duplicate;		
@@ -571,12 +621,14 @@ class Game {
 				jobj.accumulate("notify","encodedMove");
 				jobj.accumulate("player",player);
 				jobj.accumulate("move",encoded);
+				jobj.accumulate("fromClient",new JSONObject(j.toString()));
 				recordedMoves.put(jobj);
 				gH.notifyEncodedMove(jobj);
 				changePos(j, start, end, getArrayPos(player, pieceNum), attackerType);
 				printBoard("changed position");
 				printJSON("changed JSON", duplicate);
 				printCheck("checking for ","rook",1);
+				printRecordedMoves("recorded moves after another complete process");
 				return true;
 			}	
 		}	
@@ -584,6 +636,11 @@ class Game {
 			System.out.println("JSONException occured while processing isvalid move " + e);
 		}
 		return false;
+	}
+
+	private void printRecordedMoves(String info) {
+		System.out.println(info);
+		System.out.println(recordedMoves.toString());
 	}
 
 	private void printCheck(String info, String type, int arraypos)  {

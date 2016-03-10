@@ -47,6 +47,7 @@
 	
 </div>
 <script src="js/chessScript.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/gameSetUp.js"></script>
 <script src="js/chessMoves.js" type="text/javascript"></script>
 <script type="text/javascript">
 	window.onbeforeunload = function(event)

@@ -42,8 +42,9 @@
 		</div>
 
 		<span id="test"></span>
-		
+	
 	<script type="text/javascript" src="js/broadCast.js"></script>
+	<script type="text/javascript" src="js/gameSetUp.js"></script>
 	<script type="text/javascript" src="js/chessMoves.js"></script>
 </body>
 </html>

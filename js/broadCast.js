@@ -47,6 +47,35 @@ ws.onclose = function(message) {
 	console.log("connection closed");
 };
 
+
+function addSquares(src) {
+	var table = document.getElementById('chessTable');
+	var tabBody = document.createElement("tbody");
+	tabBody.setAttribute("id","chessBody");
+	for(var i=1;i<=8;i++) {
+		var tabrow = document.createElement("tr");
+		tabrow.setAttribute("class","line");
+		for(var j=1;j<=8;j++) {
+			var td = document.createElement("td");
+			td.setAttribute("xpos",j);
+			td.setAttribute("ypos",i);
+			td.setAttribute("id",""+j+i);
+			var scolor;
+			if(((i+j)%2)==0) {
+					scolor="white";
+			}
+			else {			
+					scolor="black";
+			}
+			td.setAttribute("class",scolor);
+			tabrow.appendChild(td);
+		}
+		tabBody.appendChild(tabrow);
+	}
+	table.style.border = "2px solid black";
+	table.appendChild(tabBody);	
+}
+
 function newElement(type, inner, cls) {
 	var element = document.createElement(type);
 	element.setAttribute("class", cls);
@@ -95,116 +124,6 @@ function broadcast(game) {
 	window.location.href= "broadCast?player1="+game.getAttribute("player1")+"&player2="+game.getAttribute("player2");
 }
 
-function setUpGame(pieces) {
-	console.log("setUpGame called");
-	console.log(pieces);
-	addSquares();
-	var cutpieces = [];
-	for(var x in pieces) {
-		if(x != "promoted") {
-		//console.log("pieces for "+x);
-			addPieceType(x, pieces[x], pieces["promoted"], cutpieces);
-		}
-
-	}
-	var leftboard= document.getElementById("leftboard");
-	for(var y in cutpieces) {
-		//console.log(y);
-		//if(y < leftboard.length) {
-		//	console.log(cutpieces[y]);
-			leftboard.appendChild(cutpieces[y]);	
-		//}
-		
-	}
-	console.log("setUpGame ended");
-}
-
-
-function addSquares(src) {
-	var table = document.getElementById('chessTable');
-	var tabBody = document.createElement("tbody");
-	tabBody.setAttribute("id","chessBody");
-	for(var i=1;i<=8;i++) {
-		var tabrow = document.createElement("tr");
-		tabrow.setAttribute("class","line");
-		for(var j=1;j<=8;j++) {
-			var td = document.createElement("td");
-			td.setAttribute("xpos",j);
-			td.setAttribute("ypos",i);
-			td.setAttribute("id",""+j+i);
-			var scolor;
-			if(((i+j)%2)==0) {
-					scolor="white";
-			}
-			else {			
-					scolor="black";
-			}
-			td.setAttribute("class",scolor);
-			tabrow.appendChild(td);
-		}
-		tabBody.appendChild(tabrow);
-	}
-	table.style.border = "2px solid black";
-	table.appendChild(tabBody);	
-}
-
-
-
-
-function addPieceType(type, array, promotedPieces, cutpieces) {
-	
-	for(var i in array) {		
-		var img = document.createElement("img");
-		if(i%2==0) {
-			img.setAttribute("src","img/black"+capitalize(type)+".png");
-			img.setAttribute("class","piece "+type+" black");
-			img.setAttribute("player","black");
-			img.setAttribute("id","black"+type+(Math.floor(i/2)+1));
-		}
-		else {
-			img.setAttribute("src","img/white"+capitalize(type)+".png");
-			img.setAttribute("class","piece "+type+" white");
-			img.setAttribute("player","white");
-			img.setAttribute("id","white"+type+(Math.floor(i/2)+1));
-		}
-		img.setAttribute("onmouseover","this.style.cursor='grab';");
-		if(type == "pawn" && (promotedPieces[i] != "none")) {
-			img.setAttribute("piece",promotedPieces[i]);
-			if(img.getAttribute("player") == "white") {
-				img.setAttribute("src","img/whiteQueen.png");
-			}
-			else {
-				img.setAttribute("src","img/blackQueen.png");
-			}
-		}
-		else {
-			img.setAttribute("piece",type);
-		}
-		if(array[i] > 10 && array[i] < 89) {
-			document.getElementById(array[i]).appendChild(img);
-			//target.appendChild(img);
-		}
-		else if(array[i] >=100) {
-			cutpieces[array[i]%100]= img;
-		//	console.log("setting it up at "+ array[i]%100 + " for "+array[i]);
-		//	console.log("cuuted piecec is ");
-		//	console.log(img);
-		//	console.log(cutpieces);
-		}
-		
-	}
-	//console.log("done adding pieces for "+type);
-}
-
-
-function capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-function removeSquares() {
-	var tbody = document.getElementById('chessBody');
-	tbody.parentNode.removeChild(tbody);
-}
 
 function removeChessElements() {
 	
